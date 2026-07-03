@@ -1,13 +1,19 @@
-from rich.console import Console
+from rich.console import Console, Group
 from rich.panel import Panel
 from rich.text import Text
 from rich.table import Table
+from src.config import read
 from rich import box
 from src.commands import (
     core_commands,
-    crud_command
+    crud_commands
 )
+import requests
+import urllib3
+import sys
 
+# disable insecure request warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 console = Console()
 
 class OnStart:
@@ -17,6 +23,7 @@ class OnStart:
         with open("./ascii.txt", "r", encoding="utf-8") as file:
             self.ascii_text += file.read()
         
+        
     def intro(self):
         # display ascii text first
         console.print(self.ascii_text, style="cyan")
@@ -24,7 +31,7 @@ class OnStart:
         console.print(
             Panel.fit(
                 Text.from_markup(
-                    "[bold cyan]ElasticEase[/bold cyan] is an interactive CLI for working with "
+                    "[bold cyan]Elasticease[/bold cyan] is an interactive CLI for working with "
                     "Elasticsearch from your terminal.\n\n"
                     "It is built to make common cluster tasks easier: check cluster health, "
                     "ping your configured Elasticsearch node, inspect shards, indices, nodes, "
@@ -42,7 +49,6 @@ class OnStart:
 
     def display_commands(self):
         core_commands_table = Table(
-            title="Core Commands",
             show_header=True,
             header_style="bold bright_cyan",
             expand=True,
@@ -56,8 +62,96 @@ class OnStart:
         
         for command in core_commands:
             core_commands_table.add_row(
-                command.get("name"),
+                f"[bold]{command.get("name")}[/bold]",
                 command.get("purpose"),
                 command.get("example") if command.get("example") else "-"
             )
+        
+        # CRUD operations commands
+        crud_commands_table = Table(
+            show_header=True,
+            header_style="bold bright_cyan",
+            expand=True,
+            box=box.SIMPLE_HEAVY,
+            pad_edge=False
+        )
+        
+        crud_commands_table.add_column("command")
+        crud_commands_table.add_column("purpose")
+        crud_commands_table.add_column("example")
+        
+        for command in crud_commands:
+            crud_commands_table.add_row(
+                f"[bold]{command.get("name")}[/bold]",
+                command.get("purpose"),
+                command.get("example") if command.get("example") else "-",
+                
+            )
+        
+        # core commands panel
+        core_commands_panel = Panel(
+            core_commands_table,
+            title="Core commands",
+            box=box.ROUNDED,
+            border_style="yellow"
+        )
+        
+        # crud commands panel
+        crud_commands_panel = Panel(
+            crud_commands_table,
+            title="CRUD commands",
+            box=box.ROUNDED,
+            border_style="yellow"
+        )
+        
+        # group of core and crud commands panel
+        commands_group = Group(
+            core_commands_panel,
+            crud_commands_panel,
+        )
+        console.print(Panel(commands_group, title="Available options", border_style="bright_yellow", box=box.ROUNDED))
+    
+    def verify_connection(self, base_url: str, auth: tuple):
+        try:
+            try:
+                response = requests.get(
+                    url=base_url,
+                    timeout=10,
+                    auth=auth,
+                    verify=False
+                )
+            except KeyboardInterrupt:
+                console.print("See ya!", style="bold")
+                sys.exit(1)
+                
+            if response.status_code != 200:
+                return False
+            return True
+        except Exception as e:
+            return (False, e)
+        
+    def display_connection_status(self):
+        configuration = read()["elasticease"]
+        base_url = configuration["base_url"]
+        username = configuration["username"]
+        password = configuration["password"]
+        status = f"[bold]Base URL:[/bold] [bright_blue]{base_url}[/bright_blue]\n[bold]Connection:[/bold] "
+        
+        # check connection
+        auth = (username, password)
+        connection = self.verify_connection(base_url, auth)
+        
+        if isinstance(connection, tuple):
+            console.print(connection[1], style="bold red")
+            return  
+        
+        if not connection:
+            status += "❌"
+        else:
+            status += "🟢"
+        
+        console.print(status)
+        
+        
+        
         

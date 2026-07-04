@@ -15,7 +15,7 @@ def write(data: dict):
     """
     try:
         with open("./config.yaml", "w") as file:
-            yaml.safe_dump(data, file)
+            yaml.safe_dump(data, file, default_flow_style=False)
     except Exception as e:
         return (False, e)
     

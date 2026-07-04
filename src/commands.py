@@ -16,7 +16,7 @@ core_commands = [
         "purpose": "Ping to your Elastic cluster"
     },
     {
-        "name": "index \"index_name\" (optional) \"json\"",
+        "name": "index \"index_name\"",
         "purpose": "See details of target index",
         "example": "index \"students\""
     },

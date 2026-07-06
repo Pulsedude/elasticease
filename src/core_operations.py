@@ -2,7 +2,6 @@ from rich.console import Console
 from .config import read, write
 from rich.table import Table
 from rich.json import JSON
-from rich.markdown import Markdown
 import requests
 import json
 import urllib3
@@ -402,3 +401,5 @@ class CoreOps:
         except Exception as e:
             console.print(e, style="bold red")
             print()
+
+    

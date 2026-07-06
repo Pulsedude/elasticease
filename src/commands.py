@@ -65,9 +65,14 @@ crud_commands = [
         "example": "add \"students\" \"name: John, age: 18, interest: AI\""
     },
     {
-        "name": "see \"index_name\" \"document_id\"",
+        "name": "doc \"index_name\" \"document_id\"",
         "purpose": "See specific document of any index",
-        "example": "see \"students\" \"12345XYSA_abc\""
+        "example": "doc \"students\" \"12345XYSA_abc\""
+    },
+    {
+        "name": "see \"index_name\"",
+        "purpose": "See specific index with their stored data",
+        "example": "see \"students\""
     },
     {
         "name": "update \"index_name\" \"document_id\" \"document\"",

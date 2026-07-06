@@ -9,8 +9,12 @@ from .utils import remove_commas
 # core commands ------
 from .core_operations import CoreOps
 
+# crud commands ------
+from .crud_operations import CrudOps
+
 console = Console()
 coreops = CoreOps()
+crudops = CrudOps()
 
 
 def user_command_handler():
@@ -116,9 +120,95 @@ def user_command_handler():
                     coreops.new_password(remove_commas(command_to_update_elastic_password[1]))
 
                 # clear console
-                elif user_input.lower() == "clear":
+                elif user_input.lower() in ("clear", "cls"):
                     print("\033[2J\033[H")
 
+                
+                # ----------------------------------------------------------------------
+                #                       CRUD Commands handling
+                # ----------------------------------------------------------------------
+
+                # to create a new index
+                elif user_input.lower().startswith("create"):
+                    command_to_create_new_index = user_input.split()
+                    if len(command_to_create_new_index) < 2:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"create <index_name>\" to create a new index.\n", style="red")
+                        continue
+                    
+                    crudops.create_new_index(remove_commas(command_to_create_new_index[1]))
+                    
+                # to delete a existing index
+                elif user_input.lower().startswith("delete"):
+                    command_to_delete_index = user_input.split()
+                    if len(command_to_delete_index) < 2:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"delete <index_name>\" to delete a existing index.\n", style="red")
+                        continue
+                    
+                    crudops.delete_index(remove_commas(command_to_delete_index[1]))
+                    
+                # to insert document into existing index
+                elif user_input.lower().startswith("add"):
+                    command_to_insert_document = user_input.split()
+                    if len(command_to_insert_document) < 3:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"add <index_name> <document_in_str>\" to add document into existing index.\n", style="red")
+                        continue
+                    
+                    # extract document fields and values and build a proper document string 
+                    doc_str = ""
+                    for i in command_to_insert_document[2:]:
+                        if i == command_to_insert_document[-1]:
+                            doc_str += i
+                            break 
+                        else:
+                            doc_str += i
+                            doc_str += " "
+                    
+                    crudops.add_document(remove_commas(command_to_insert_document[1]), doc_str)
+
+                # to see specific document
+                elif user_input.lower().startswith("doc"):
+                    command_to_see_specific_doc = user_input.split()
+                    if len(command_to_see_specific_doc) < 3:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"doc <index_name> <document_id>\" to see a specific document.\n", style="red")
+                        continue
+                    
+                    crudops.see_specific_document(remove_commas(command_to_see_specific_doc[1]), remove_commas(command_to_see_specific_doc[2]))
+                    
+                # to see specific index with their stored data
+                elif user_input.lower().startswith("see"):
+                    command_to_see_specific_index = user_input.split()
+                    if len(command_to_see_specific_index) < 2:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"see <index_name>\" to see a specific index.\n", style="red")
+                        continue
+                    
+                    crudops.see_specific_index(remove_commas(command_to_see_specific_index[1]))
+
+                # to update existing document in any specific index
+                elif user_input.lower().startswith("update"):
+                    command_to_update_doc = user_input.split()
+                    if len(command_to_update_doc) < 4:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"update <index_name> <document_id> <document_in_str>\" to update document into existing index.\n", style="red")
+                        continue
+                    
+                    # extract document fields and values and build a proper document string 
+                    doc_str = ""
+                    for i in command_to_update_doc[3:]:
+                        if i == command_to_update_doc[-1]:
+                            doc_str += i
+                            break 
+                        else:
+                            doc_str += i
+                            doc_str += " "
+                    
+                    crudops.update_document(remove_commas(command_to_update_doc[1]), remove_commas(command_to_update_doc[2]),  doc_str)
+                    
+                    
                 elif user_input.lower() in ("exit", "quit", "q", "ex"):
                     console.print("See ya!", style="bold")
                     sys.exit(0)

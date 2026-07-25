@@ -16,7 +16,7 @@ core_commands = [
         "purpose": "Ping to your Elastic cluster"
     },
     {
-        "name": "index \"index_name\"",
+        "name": "index <index_name>",
         "purpose": "See details of target index",
         "example": "index \"students\""
     },
@@ -37,12 +37,12 @@ core_commands = [
         "purpose": "Clear console screen"
     },
     {
-        "name": "conn \"URL\"",
+        "name": "conn <URL>",
         "purpose": "Change a connection URL for Elasticsearch to allow Elasticease to make connection",
         "example": "conn \"https://my_instance_xyz:9200\""
     },
     {
-        "name": "auth \"password\"",
+        "name": "auth <password>",
         "purpose": "Add or Update new Elasticsearch password for Elasticease to make connection",
         "example": "auth \"1234@newpasswordXYZ\""
     }
@@ -50,32 +50,32 @@ core_commands = [
 
 crud_commands = [
     {
-        "name": "create \"index_name\"",
+        "name": "create <index_name>",
         "purpose": "Create a new index",
         "example": "create \"students\""
     },
     {
-        "name": "delete \"index_name\"",
+        "name": "delete <index_name>",
         "purpose": "Delete a existing index",
         "example": "delete \"students\""
     },
     {
-        "name": "add \"index_name\" \"document\"",
+        "name": "add <index_name> <document>",
         "purpose": "Add a document into a index",
         "example": "add \"students\" \"name: John, age: 18, interest: AI\""
     },
     {
-        "name": "doc \"index_name\" \"document_id\"",
+        "name": "doc <index_name> <document_id>",
         "purpose": "See specific document of any index",
         "example": "doc \"students\" \"12345XYSA_abc\""
     },
     {
-        "name": "see \"index_name\"",
+        "name": "see <index_name>",
         "purpose": "See specific index with their stored data",
         "example": "see \"students\""
     },
     {
-        "name": "update \"index_name\" \"document_id\" \"document\"",
+        "name": "update <index_name> <document_id> <document>",
         "purpose": "Update a document of existing index",
         "example": "update \"students\" \"12345XYSA_abc\" \"name: John, interest: Backend\""
     }

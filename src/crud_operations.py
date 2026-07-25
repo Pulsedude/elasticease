@@ -78,7 +78,7 @@ class CrudOps:
             try:
                 document = create_document(document_str)
                 response = requests.post(
-                    self.base_url + f"/{index_name}/_doc" if not self.base_url.endswith("/") else self.base_url +f"{index_name}/_doc",
+                    self.base_url + f"/{index_name}/_doc" if not self.base_url.endswith("/") else self.base_url + f"{index_name}/_doc",
                     json=document,
                     timeout=10,
                     auth=self.auth,
@@ -91,6 +91,7 @@ class CrudOps:
                 
                 console.print(JSON(json.dumps(response.json())))
                 print()
+                
                 
             except KeyboardInterrupt:
                 console.print("See ya!", style="bold")
@@ -106,7 +107,7 @@ class CrudOps:
         try:
             try:
                 response = requests.get(
-                    self.base_url + f"/{index_name}/_doc/{document_id}" if not self.base_url.endswith("/") else self.base_url +f"{index_name}/_doc/{document_id}",
+                    self.base_url + f"/{index_name}/_doc/{document_id}" if not self.base_url.endswith("/") else self.base_url + f"{index_name}/_doc/{document_id}",
                     timeout=10,
                     auth=self.auth,
                     verify=False
@@ -170,7 +171,7 @@ class CrudOps:
                     "doc": create_document(document_str)
                 }
                 response = requests.put(
-                    self.base_url + f"/{index_name}/_doc/{document_id}" if not self.base_url.endswith("/") else self.base_url +f"{index_name}/_doc/{document_id}",
+                    self.base_url + f"/{index_name}/_doc/{document_id}" if not self.base_url.endswith("/") else self.base_url + f"{index_name}/_doc/{document_id}",
                     json=document,
                     timeout=10,
                     auth=self.auth,

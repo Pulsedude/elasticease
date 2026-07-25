@@ -22,12 +22,12 @@ def create_document(text: str) -> dict:
     last_key = ""
     for i, letter in enumerate(text.split()):
         cleaned_letter = re.sub(r'[^a-zA-Z0-9]', '', letter)
-        
+
         if (i + 1) % 2 == 0:
-            document[last_key] = cleaned_letter if not cleaned_letter.isdigit() else int(cleaned_letter)
-            
+            document[last_key] = cleaned_letter if not cleaned_letter.isdigit() else int(
+                cleaned_letter)
+
         else:
             document[cleaned_letter] = ""
             last_key = cleaned_letter if not cleaned_letter.isdigit() else int(cleaned_letter)
     return document
-

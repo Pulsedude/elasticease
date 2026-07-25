@@ -98,6 +98,16 @@ def user_command_handler():
                         coreops.nodes_capacity(json_result=True)
                     else:
                         coreops.nodes_capacity()
+                        
+                # see whether if any specific document is modified or not
+                elif user_input.lower().startswith("isdocup"):
+                    command_to_see_modified_doc = user_input.split()
+                    if len(command_to_see_modified_doc) < 3:
+                        console.print(
+                            "[!] Please use the correct syntax of command \"isdocup <index_name> <document_id>\" to whether target document is updated / modified or not.\n", style="red")
+                        continue
+                    else:
+                        coreops.is_doc_updated(remove_commas(command_to_see_modified_doc[1]), remove_commas(command_to_see_modified_doc[2]))
 
                 # update or add new elasticsearch base url
                 elif user_input.lower().startswith("conn"):

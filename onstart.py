@@ -14,6 +14,7 @@ import sys
 
 # disable insecure request warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 console = Console()
 
 class OnStart:

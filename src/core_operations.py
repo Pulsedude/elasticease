@@ -2,74 +2,49 @@ from rich.console import Console
 from .config import read, write
 from rich.table import Table
 from rich.json import JSON
-from .crud_operations import CrudOps
-import requests
 import json
 import urllib3
-import sys
 
-# utils
-from .utils import url_validator
+# custom request methods
+from .request import get, elastic_base_url
 
 # disable insecure request warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 console = Console()
-crudops = CrudOps()
 
 
 class CoreOps:
     def __init__(self):
-        self.configuration = read()["elasticease"]
-        self.auth = (self.configuration["username"],
-                     self.configuration["password"])
-
-    def make_request(self, route: str = ""):
-        """Make request to specific route on same base URL
-        """
-        try:
-            try:
-                response = requests.get(
-                    url=self.configuration["base_url"] + f"/{route}" if not self.configuration["base_url"].endswith(
-                        "/") else self.configuration["base_url"] + route,
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                )
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-
-            if response.status_code != 200:
-                return (False, response.json())
-            return response
-        except Exception as e:
-            return (False, e)
+        self.configuration = read().get("elasticease")
 
     def check_cluster_health(self):
         """Check a cluster health
         """
         try:
-            cluster_health_info_table = Table(show_lines=True)
-            response = self.make_request("_cluster/health")
+            response = get("_cluster/health")
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
+            cluster_health_info_table = Table(
+                title=f"Cluster Health | Latency: {response.get("latency")} ms", show_lines=True)
+
             cluster_health_info_table.add_column(
                 "[bright_yellow]Work[/bright_yellow]")
             cluster_health_info_table.add_column(
                 "[bright_cyan]Status[/bright_cyan]")
 
-            for work, status in dict(response.json()).items():
+            for work, status in dict(response.get("response")).items():
                 cluster_health_info_table.add_row(
                     f"[bold]{work}[/bold]",
                     str(status)
                 )
 
             console.print(cluster_health_info_table)
+            console.print()
             print()
 
         except Exception as e:
@@ -80,17 +55,25 @@ class CoreOps:
         """See available shards
         """
         try:
-            shards_table = Table(show_lines=True)
 
-            response = self.make_request("_cat/shards?format=json")
+            response = get("_cat/shards?format=json")
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
+            shards_table = Table(
+                title=f"Shards | Latency: {response.get("latency")} ms", show_lines=True)
+
             if json_result:
-                console.print(JSON(json.dumps(response.json())))
+                shards_data = {
+                    "shards": response.get("response"),
+                    "latency": f"{response.get("latency")} ms"
+                }
+
+                console.print(JSON(json.dumps(shards_data)))
+                console.print()
                 print()
                 return
 
@@ -104,7 +87,7 @@ class CoreOps:
             shards_table.add_column("ip")
             shards_table.add_column("node")
 
-            for shard_info in response.json():
+            for shard_info in response.get("response"):
                 shards_table.add_row(
                     f"[bright_cyan]{shard_info.get("index")}[/bright_cyan]",
                     f"[bright_blue]{shard_info.get("shard")}[/bright_blue]",
@@ -128,16 +111,23 @@ class CoreOps:
         """List all available indices
         """
         try:
-            indices_table = Table(show_lines=True)
-            response = self.make_request("_cat/indices?format=json")
+            response = get("_cat/indices?format=json")
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
+            indices_table = Table(
+                title=f"Indices | Latency: {response.get("latency")} ms", show_lines=True)
+
             if json_result:
-                console.print(JSON(json.dumps(response.json())))
+                indices_data = {
+                    "indices": response.get("response"),
+                    "latency": f"{response.get("latency")} ms"
+                }
+
+                console.print(JSON(json.dumps(indices_data)))
                 print()
                 return
 
@@ -153,7 +143,7 @@ class CoreOps:
             indices_table.add_column("pri.store.size")
             indices_table.add_column("dataset.size")
 
-            for index_info in response.json():
+            for index_info in response.get("response"):
                 indices_table.add_row(
                     f"[bright_green]{index_info.get("health")}[/bright_green]" if index_info.get(
                         "health").lower() == "green" else f"[bright_yellow]{index_info.get("health")}[/bright_yellow]",
@@ -190,7 +180,7 @@ class CoreOps:
         """Ping test on the cluster
         """
         try:
-            response = self.make_request()
+            response = get()
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -198,8 +188,8 @@ class CoreOps:
                 return
 
             console.print(
-                f"[bold]Base URL:[/bold] [bright_blue]{self.configuration["base_url"]}[/bright_blue]\n[bold]Status:[/bold] 🟢 [bright_green]Healthy[/bright_green]\n")
-            console.print(response.json())
+                f"[bold]Base URL:[/bold] [bright_blue]{elastic_base_url}[/bright_blue]\n[bold]Status:[/bold] 🟢 [bright_green]Healthy[/bright_green]\n")
+            console.print(response.get("latency"))
             print()
 
         except Exception as e:
@@ -210,50 +200,57 @@ class CoreOps:
         """See details of specific target index 
         """
         try:
-            response = self.make_request(index_name)
+            response = get(index_name)
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
-            console.print(JSON(json.dumps(response.json())))
+            console.print(JSON(json.dumps(response.get("response"))))
             print()
         except Exception as e:
             console.print(e, style="bold red")
             print()
 
-    def master_nodes(self, json_result: bool = False):
-        """See master nodes
+    def master_node(self, json_result: bool = False):
+        """See master node
         """
         try:
-            master_nodes_table = Table(show_lines=True)
-            response = self.make_request("_cat/master?format=json")
+            response = get("_cat/master?format=json")
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
+            master_node_table = Table(
+                title=f"Master Node | Latency: {response.get("latency")} ms", show_lines=True)
+
             if json_result:
-                console.print(JSON(json.dumps(response.json())))
+                master_node_data = {
+                    "master node": response.get("response"),
+                    "latency": f"{response.get("latency")} ms"
+                }
+
+                console.print(JSON(json.dumps(master_node_data)))
                 print()
                 return
 
-            master_nodes_table.add_column("id")
-            master_nodes_table.add_column("host")
-            master_nodes_table.add_column("ip")
-            master_nodes_table.add_column("node")
+            master_node_table.add_column("id")
+            master_node_table.add_column("host")
+            master_node_table.add_column("ip")
+            master_node_table.add_column("node")
 
-            for master_node_details in response.json():
-                master_nodes_table.add_row(
+            for master_node_details in response.get("response"):
+                master_node_table.add_row(
                     f"[white]{master_node_details.get("id")}[/white]",
                     f"[bright_cyan]{master_node_details.get("host")}[/bright_cyan]",
                     f"[deep_sky_blue1]{master_node_details.get("ip")}[/deep_sky_blue1]",
                     f"[light_steel_blue1]{master_node_details.get("node")}[/light_steel_blue1]"
                 )
 
-            console.print(master_nodes_table)
+            console.print(master_node_table)
             print()
         except Exception as e:
             console.print(e, style="bold red")
@@ -263,16 +260,23 @@ class CoreOps:
         """See list of active nodes on cluster
         """
         try:
-            nodes_table = Table(show_lines=True)
-            response = self.make_request("_cat/nodes?format=json")
+            response = get("_cat/nodes?format=json")
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
+            nodes_table = Table(
+                title=f"Active Nodes | Latency: {response.get("latency")} ms", show_lines=True)
+
             if json_result:
-                console.print(JSON(json.dumps(response.json())))
+                active_nodes_data = {
+                    "active nodes": response.get("response"),
+                    "latency": f"{response.get("latency")} ms"
+                }
+
+                console.print(JSON(json.dumps(active_nodes_data)))
                 print()
                 return
 
@@ -287,7 +291,7 @@ class CoreOps:
             nodes_table.add_column("master")
             nodes_table.add_column("name")
 
-            for node_details in response.json():
+            for node_details in response.get("response"):
                 nodes_table.add_row(
                     f"[white]{node_details.get("ip")}[/white]",
                     f"[bright_blue]{node_details.get("heap.percent")}[/bright_blue]",
@@ -314,16 +318,23 @@ class CoreOps:
         """See the total capacities of storage size and available capacity of active nodes
         """
         try:
-            nodes_capacity_table = Table(show_lines=True)
-            response = self.make_request("_cat/allocation?format=json")
+            response = get("_cat/allocation?format=json")
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
+            nodes_capacity_table = Table(
+                title=f"Nodes Allocation | Latency: {response.get("latency")} ms", show_lines=True)
+
             if json_result:
-                console.print(JSON(json.dumps(response.json())))
+                nodes_alloc_data = {
+                    "nodes allocation": response.get("response"),
+                    "latency": f"{response.get("latency")} ms"
+                }
+
+                console.print(JSON(json.dumps(nodes_alloc_data)))
                 print()
                 return
 
@@ -341,7 +352,7 @@ class CoreOps:
             nodes_capacity_table.add_column("node")
             nodes_capacity_table.add_column("node.role")
 
-            for node_capacity_details in response.json():
+            for node_capacity_details in response.get("response"):
                 nodes_capacity_table.add_row(
                     f"[white]{node_capacity_details.get("shards")}[/white]",
                     f"[bright_yellow]{node_capacity_details.get("shards.undesired")}[/bright_yellow]" if node_capacity_details.get(
@@ -376,25 +387,24 @@ class CoreOps:
             console.print(e, style="bold red")
             print()
 
+    # def new_password(self, password: str):
+    #     """Change or update a new Elasticsearch password for connection
+    #     """
+    #     try:
+    #         configuration = read()
 
-    def new_password(self, password: str):
-        """Change or update a new Elasticsearch password for connection
-        """
-        try:
-            configuration = read()
+    #         if isinstance(configuration, tuple):
+    #             console.print(configuration[1], style="bold red")
+    #             print()
+    #             return
 
-            if isinstance(configuration, tuple):
-                console.print(configuration[1], style="bold red")
-                print()
-                return
+    #         configuration.setdefault("elasticease", {})
+    #         configuration["elasticease"]["password"] = password
+    #         write(configuration)
 
-            configuration.setdefault("elasticease", {})
-            configuration["elasticease"]["password"] = password
-            write(configuration)
-
-            self.configuration = configuration["elasticease"]
-            console.print(
-                f"[bold]New Password:[/bold] [bright_cyan]{password}[/bright_cyan]\n[bright_green]Updated! Now please restart the elasticease to continue.[/bright_green]\n")
-        except Exception as e:
-            console.print(e, style="bold red")
-            print()
+    #         self.configuration = configuration["elasticease"]
+    #         console.print(
+    #             f"[bold]New Password:[/bold] [bright_cyan]{password}[/bright_cyan]\n[bright_green]Updated! Now please restart the elasticease to continue.[/bright_green]\n")
+    #     except Exception as e:
+    #         console.print(e, style="bold red")
+    #         print()

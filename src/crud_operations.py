@@ -1,196 +1,145 @@
 from rich.console import Console
 from rich.json import JSON
 from .config import read
-import requests
 import json
 import sys
 
-# utils
+# custom request methods
+from .request import get, post, put, delete
+
+# utilites
 from .utils import create_document
 
 console = Console()
 
+
 class CrudOps:
     def __init__(self):
-        self.configuration = read()["elasticease"]
-        self.auth = (self.configuration["username"], self.configuration["password"])
-        self.base_url = self.configuration["base_url"]
-        
-    def create_new_index(self, index_name: str):
+        self.configuration = read().get("elasticease")
+
+    def new_index(self, index_name: str):
         """Create new index
         """
         try:
-            try:
-                response = requests.put(
-                    self.base_url + f"/{index_name}" if not self.base_url.endswith("/") else self.base_url + index_name,
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                )
-                
-                if response.raise_for_status():
-                    console.print(f"[!] Something went wrong! Please check the base url and try again\n", style="red")
-                    return
-                
-                console.print(JSON(json.dumps(response.json())))
+            response = put(index_name)
+
+            if isinstance(response, tuple):
+                console.print(response[1], style="bold red")
                 print()
-                
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-                
+                return
+
+            console.print(JSON(json.dumps(response.get("response"))))
+            print()
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
-        
-    def delete_index(self, index_name: str):
+
+    def del_index(self, index_name: str):
         """Delete any specific existing index
         """
         try:
-            try:
-                response = requests.delete(
-                    self.base_url + f"/{index_name}" if not self.base_url.endswith("/") else self.base_url + index_name,
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                ) 
-                
-                if response.raise_for_status():
-                    console.print(f"[!] Something went wrong! Please check the base url and try again\n", style="red")
-                    return
-                
-                console.print(JSON(json.dumps(response.json())))
+            response = delete(index_name)
+
+            if isinstance(response, tuple):
+                console.print(response[1], style="bold red")
                 print()
-                
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-                
+                return
+
+            console.print(JSON(json.dumps(response.get("response"))))
+            print()
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
-            
-    
-    def add_document(self, index_name: str, document_str: str):
+
+    def add_doc(self, index_name: str, document_str: str):
         """Insert a document into specific existing index
         """
         try:
-            try:
-                document = create_document(document_str)
-                response = requests.post(
-                    self.base_url + f"/{index_name}/_doc" if not self.base_url.endswith("/") else self.base_url + f"{index_name}/_doc",
-                    json=document,
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                ) 
-                
-                if response.raise_for_status():
-                    console.print(f"[!] Something went wrong! Please check the base url and try again\n", style="red")
-                    return
-                
-                console.print(JSON(json.dumps(response.json())))
+            document = create_document(document_str)
+            response = post(index_name, document)
+
+            if isinstance(response, tuple):
+                console.print(response[1], style="bold red")
                 print()
-                
-                
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-                
+                return
+
+            console.print(JSON(json.dumps(response.get("response"))))
+            print()
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
-            
-    def see_specific_document(self, index_name: str, document_id: str):
+
+    def see_specific_doc(self, index_name: str, document_id: str):
         """See specific document from any existing index
         """
         try:
-            try:
-                response = requests.get(
-                    self.base_url + f"/{index_name}/_doc/{document_id}" if not self.base_url.endswith("/") else self.base_url + f"{index_name}/_doc/{document_id}",
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                ) 
-                
-                if response.raise_for_status():
-                    console.print(f"[!] Something went wrong! Please check the base url and try again\n", style="red")
-                    return
-                
-                console.print(JSON(json.dumps(response.json())))
+            response = get(f"{index_name}/_doc/{document_id}")
+
+            if isinstance(response, tuple):
+                console.print(response[1], style="bold red")
                 print()
-                
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-                
+                return
+
+            console.print(JSON(json.dumps(response.get("response"))))
+            print()
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
-            
-            
-    def see_specific_index(self, index_name: str):
+
+    def inspect_index_data(self, index_name: str, size: str = "100"):
         """See specific index with their stored data
         """
         try:
-            try:
-                query = {
-                    "query": {
-                        "match_all": {}
-                    }
-                }
-                response = requests.get(
-                    self.base_url + f"/{index_name}/_search" if not self.base_url.endswith("/") else self.base_url +f"{index_name}/_search/",
-                    json=query,
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                ) 
-                
-                if response.raise_for_status():
-                    console.print(f"[!] Something went wrong! Please check the base url and try again\n", style="red")
-                    return
-                
-                console.print(JSON(json.dumps(response.json())))
+
+            response = get(f"{index_name}/_search?size={size}")
+
+            if isinstance(response, tuple):
+                console.print(response[1], style="bold red")
                 print()
-                
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-                
+                return
+
+            console.print(JSON(json.dumps(response.get("response"))))
+            print()
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
-    
-    def update_document(self, index_name: str, document_id: str, document_str: str):
+
+    def update_doc(self, index_name: str, document_id: str, document_str: str):
         """Insert a document into specific existing index
         """
         try:
-            try:
-                document = {
-                    "doc": create_document(document_str)
-                }
-                response = requests.put(
-                    self.base_url + f"/{index_name}/_doc/{document_id}" if not self.base_url.endswith("/") else self.base_url + f"{index_name}/_doc/{document_id}",
-                    json=document,
-                    timeout=10,
-                    auth=self.auth,
-                    verify=False
-                )
-                
-                if response.raise_for_status():
-                    console.print(f"[!] Something went wrong! Please check the base url and try again\n", style="red")
-                    return
-                
-                console.print(JSON(json.dumps(response.json())))
+
+            # first of all fetch the target document for their seq_no for checking whether document is modified or not to prevent from loss & update problem
+            get_doc = get(f"{index_name}/_doc/{document_id}")
+
+            if isinstance(get_doc, tuple):
+                console.print(get_doc[1], style="bold red")
                 print()
-                
-            except KeyboardInterrupt:
-                console.print("See ya!", style="bold")
-                sys.exit(1)
-                
+                return
+
+            seq_no = get_doc.json()["_seq_no"]
+            primary_term = get_doc.json()["_primary_term"]
+
+            # update the document if _seq_no and _primary_term both are same (means no modification is made)
+            document = {
+                "doc": create_document(document_str)
+            }
+            updation_res = put(
+                f"{index_name}/_update/{document_id}?if_seq_no={seq_no}&if_primary_term={primary_term}", document)
+
+            if isinstance(updation_res, tuple):
+                console.print(updation_res[1], style="bold red")
+                print()
+                return
+
+            console.print(JSON(json.dumps(updation_res.get("response"))))
+            print()
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
-    
-    

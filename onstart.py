@@ -132,10 +132,15 @@ class OnStart:
             return (False, e)
         
     def display_connection_status(self):
-        configuration = read()["elasticease"]
-        base_url = configuration["base_url"]
-        username = configuration["username"]
-        password = configuration["password"]
+        configuration = read().get("elasticease")
+        base_url = None if isinstance(configuration, tuple) else configuration.get("elasticsearch").get("base_url")
+        username = None if isinstance(configuration, tuple) else configuration.get("elasticsearch").get("username")
+        password = None if isinstance(configuration, tuple) else configuration.get("elasticsearch").get("password")
+        
+        if base_url is None:
+            console.print(f"elasticsearch base_url is {base_url}\nPlease check the elasticsearch base_url in the configuration and then try again!", style="red")
+            sys.exit(1)
+            
         status = f"[bold]Base URL:[/bold] [bright_blue]{base_url}[/bright_blue]\n[bold]Connection:[/bold] "
         
         # check connection

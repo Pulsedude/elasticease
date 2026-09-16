@@ -151,10 +151,7 @@ class OnStart:
             console.print(connection[1], style="bold red")
             return  
         
-        if not connection:
-            status += "❌"
-        else:
-            status += "🟢"
+        status += "🔴" if not connection else "🟢"
         
         console.print(status)
         

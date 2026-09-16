@@ -1,11 +1,11 @@
 from litellm import completion
+from .config import read
 import requests
-import config
 
 
 class Ollama:
     def __init__(self):
-        configuration = config.read().get("elasticease")
+        configuration = read().get("elasticease")
 
         self.base_url = None if isinstance(configuration, tuple) else configuration.get(
             "ai_inference").get("ollama").get("base_url")
@@ -40,7 +40,7 @@ class Ollama:
             if response.status_code != 200:
                 return (False, response.json())
             
-            return response.json()
+            return response.json()["message"]["content"]
         
         except Exception as e:
             return (False, str(e))
@@ -49,7 +49,7 @@ class Ollama:
         
 class LiteLLM:
     def __init__(self):
-        configuration = config.read().get("elasticease")
+        configuration = read().get("elasticease")
 
         self.model = None if isinstance(configuration, tuple) else configuration.get(
             "ai_inference").get("litellm").get("model")
@@ -71,3 +71,5 @@ class LiteLLM:
         except Exception as e:
             return (False, str(e))
 
+# obj = Ollama()
+# print(obj.ask("wsp?"))

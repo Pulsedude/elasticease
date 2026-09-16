@@ -1,7 +1,8 @@
 core_commands = [
     {
-        "name": "health",
+        "name": "health <AI Summary>",
         "purpose": "See health of Elastic Cluster",
+        "example": "health | health true"
     },
     {
         "name": "shards",
@@ -16,9 +17,9 @@ core_commands = [
         "purpose": "Ping to your Elastic cluster"
     },
     {
-        "name": "index <index_name>",
+        "name": "indexinfo <index_name>",
         "purpose": "See details of target index",
-        "example": "index \"students\""
+        "example": "indexinfo \"students\""
     },
     {
         "name": "master",
@@ -42,41 +43,41 @@ core_commands = [
         "example": "conn \"https://my_instance_xyz:9200\""
     },
     {
-        "name": "auth <password>",
+        "name": "newcred <password>",
         "purpose": "Add or Update new Elasticsearch password for Elasticease to make connection",
-        "example": "auth \"1234@newpasswordXYZ\""
+        "example": "nrecred \"1234@newpasswordXYZ\""
     }
 ]
 
 crud_commands = [
     {
-        "name": "create <index_name>",
+        "name": "index:new <index_name>",
         "purpose": "Create a new index",
-        "example": "create \"students\""
+        "example": "index:new \"students\""
     },
     {
-        "name": "delete <index_name>",
-        "purpose": "Delete a existing index",
+        "name": "index:del <index_name>",
+        "purpose": "index:del a existing index",
         "example": "delete \"students\""
     },
     {
-        "name": "add <index_name> <document>",
+        "name": "addoc <index_name> <document>",
         "purpose": "Add a document into a index",
-        "example": "add \"students\" \"name: John, age: 18, interest: AI\""
+        "example": "addoc \"students\" \"name: John, age: 18, interest: AI\""
     },
     {
-        "name": "doc <index_name> <document_id>",
-        "purpose": "See specific document of any index",
-        "example": "doc \"students\" \"12345XYSA_abc\""
+        "name": "inspect:doc <index_name> <document_id>",
+        "purpose": "See specific document of any such existing index",
+        "example": "inspect:doc \"students\" \"12345XYSA_abc\""
     },
     {
-        "name": "see <index_name>",
-        "purpose": "See specific index with their stored data",
-        "example": "see \"students\""
+        "name": "inspect:index <index_name>",
+        "purpose": "See any such existing specific index with their stored data",
+        "example": "inspect:index \"students\""
     },
     {
-        "name": "update <index_name> <document_id> <document>",
+        "name": "updoc <index_name> <document_id> <document>",
         "purpose": "Update a document of existing index",
-        "example": "update \"students\" \"12345XYSA_abc\" \"name: John, interest: Backend\""
+        "example": "updoc \"students\" \"12345XYSA_abc\" \"name: John, interest: Backend\""
     }
 ]

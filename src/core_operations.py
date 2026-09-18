@@ -5,9 +5,10 @@ from rich.table import Table
 from rich.json import JSON
 import json
 import urllib3
+import asyncio
 
-# custom request methods
-from .request import get, elastic_base_url
+# custom request logic
+from .request import Request
 
 # ai inferences
 from .ai_inference import Ollama, LiteLLM
@@ -16,6 +17,7 @@ from .ai_inference import Ollama, LiteLLM
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 console = Console()
+req = Request()
 
 
 class CoreOps:
@@ -24,6 +26,8 @@ class CoreOps:
         
         self.ai_mode = configuration if isinstance(configuration, tuple) else configuration.get("elasticease").get("ai_mode")
         self.selected_ai_inference = configuration if isinstance(configuration, tuple) else configuration.get("elasticease").get("selected_ai_inference")
+        
+        self.elastic_base_url = configuration if isinstance(configuration, tuple) else configuration.get("elasticease").get("base_url")
         
         # AI Inferences instances
         self.ollama = Ollama()
@@ -95,7 +99,7 @@ class CoreOps:
         """Check a cluster health
         """
         try:
-            response = get("_cluster/health")
+            response = asyncio.run(req.get("_cluster/health"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -132,7 +136,7 @@ class CoreOps:
         """
         try:
 
-            response = get("_cat/shards?format=json")
+            response = asyncio.run(req.get("_cat/shards?format=json"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -188,11 +192,11 @@ class CoreOps:
             console.print(e, style="bold red")
             print()
 
-    def available_indices(self, json_result: bool = False, ai_summarization: bool = False):
+    def list_indices(self, json_result: bool = False, ai_summarization: bool = False):
         """List all available indices
         """
         try:
-            response = get("_cat/indices?format=json")
+            response = asyncio.run(req.get("_cat/indices?format=json"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -268,18 +272,18 @@ class CoreOps:
         """Ping test on the cluster
         """
         try:
-            response = get()
+            response = asyncio.run(req.get())
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
                 print()
                 return
 
-            ping_info = f"[bold]Base URL:[/bold] [bright_blue]{elastic_base_url}[/bright_blue]\n[bold]Status:[/bold] 🟢 [bright_green]Healthy[/bright_green]\nLatency: {response.get("latency")} ms"
+            ping_info = f"[bold]Base URL:[/bold] [bright_blue]{self.elastic_base_url}[/bright_blue]\n[bold]Status:[/bold] 🟢 [bright_green]Healthy[/bright_green]\nLatency: {response.get("latency")} ms"
 
             if not (ai_summarization or (isinstance(self.ai_mode, bool) and self.ai_mode)):
                 console.print(
-                    f"[bold]Base URL:[/bold] [bright_blue]{elastic_base_url}[/bright_blue]\n[bold]Status:[/bold] 🟢 [bright_green]Healthy[/bright_green]\n")
+                    f"[bold]Base URL:[/bold] [bright_blue]{self.elastic_base_url if not isinstance(self.elastic_base_url, tuple) else self.elastic_base_url[1]}[/bright_blue]\n[bold]Status:[/bold] 🟢 [bright_green]Healthy[/bright_green]\n")
                 console.print(response.get("latency"))
                 print()
                 return
@@ -295,10 +299,10 @@ class CoreOps:
             print()
 
     def index_details(self, index_name: str, ai_summarization: bool = False):
-        """See details of specific target index 
+        """See details of specific target index  
         """
         try:
-            response = get(index_name)
+            response = asyncio.run(req.get(index_name))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -321,11 +325,11 @@ class CoreOps:
             console.print(e, style="bold red")
             print()
 
-    def master_node(self, json_result: bool = False, ai_summarization: bool = False):
+    def master_node(self, json_result: bool = False):
         """See master node
         """
         try:
-            response = get("_cat/master?format=json")
+            response = asyncio.run(req.get("_cat/master?format=json"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -341,6 +345,7 @@ class CoreOps:
                     "latency": f"{response.get("latency")} ms"
                 }
                 data_to_display = JSON(json.dumps(master_node_data))
+                
             else:
                 master_node_table.add_column("id")
                 master_node_table.add_column("host")
@@ -356,16 +361,10 @@ class CoreOps:
                     )
                 data_to_display = master_node_table
 
-            if not (ai_summarization or (isinstance(self.ai_mode, bool) and self.ai_mode)):
-                console.print(data_to_display)
-                print()
-                return
+            console.print(data_to_display)
+            print()
+            return
             
-            else:
-                self.display_data_with_summary(
-                    data_to_display,
-                    f"{response}\nHere is the current active master node data for the Elasticsearch cluster. Please summarize which node is currently elected as master, its IP and host, and briefly explain whether the cluster master is stable and healthy."
-                )
         except Exception as e:
             console.print(e, style="bold red")
             print()
@@ -374,7 +373,7 @@ class CoreOps:
         """See list of active nodes on cluster
         """
         try:
-            response = get("_cat/nodes?format=json")
+            response = asyncio.run(req.get("_cat/nodes?format=json"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -438,7 +437,7 @@ class CoreOps:
         """See the total capacities of storage size and available capacity of active nodes
         """
         try:
-            response = get("_cat/allocation?format=json")
+            response = asyncio.run(req.get("_cat/allocation?format=json"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")
@@ -513,24 +512,23 @@ class CoreOps:
             console.print(e, style="bold red")
             print()
 
-    # def new_password(self, password: str):
-    #     """Change or update a new Elasticsearch password for connection
-    #     """
-    #     try:
-    #         configuration = read()
+    def new_password(self, password: str):
+        """Change or update a new Elasticsearch password for connection
+        """
+        try:
+            configuration = read()
+            
+            if isinstance(configuration, tuple):
+                return (False, configuration[1])
 
-    #         if isinstance(configuration, tuple):
-    #             console.print(configuration[1], style="bold red")
-    #             print()
-    #             return
+            configuration.setdefault("elasticease", {})
+            configuration["elasticease"]["elasticsearch"]["password"] = password
+            write(configuration)
 
-    #         configuration.setdefault("elasticease", {})
-    #         configuration["elasticease"]["password"] = password
-    #         write(configuration)
-
-    #         self.configuration = configuration["elasticease"]
-    #         console.print(
-    #             f"[bold]New Password:[/bold] [bright_cyan]{password}[/bright_cyan]\n[bright_green]Updated! Now please restart the elasticease to continue.[/bright_green]\n")
-    #     except Exception as e:
-    #         console.print(e, style="bold red")
-    #         print()
+            self.configuration = configuration["elasticease"]
+            console.print(
+                f"[bold]New Password:[/bold] [bright_cyan]{password}[/bright_cyan]\n[bright_green]Updated! Now please restart the elasticease console to continue.[/bright_green]\n")
+            
+        except Exception as e:
+            console.print(e, style="bold red")
+            print()

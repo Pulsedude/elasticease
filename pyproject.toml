@@ -5,6 +5,7 @@ description = "A tool that makes easy to use ElasticSearch"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "httpx>=0.28.1",
     "litellm>=1.100.1",
     "pyyaml>=6.0.3",
     "requests>=2.34.2",

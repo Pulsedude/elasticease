@@ -23,5 +23,5 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         console.print(e, style="bold red")
-        print() # for gap
+        print() 
         

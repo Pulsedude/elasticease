@@ -45,7 +45,7 @@ core_commands = [
     {
         "name": "newcred <password>",
         "purpose": "Add or Update new Elasticsearch password for Elasticease to make connection",
-        "example": "nrecred \"1234@newpasswordXYZ\""
+        "example": "newcred \"1234@newpasswordXYZ\""
     }
 ]
 

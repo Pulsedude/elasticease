@@ -70,6 +70,3 @@ class LiteLLM:
         
         except Exception as e:
             return (False, str(e))
-
-# obj = Ollama()
-# print(obj.ask("wsp?"))

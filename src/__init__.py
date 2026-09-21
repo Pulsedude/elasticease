@@ -1,6 +1,6 @@
 from .core_operations import CoreOps
 from .crud_operations import CrudOps
-from .user_command import user_command_handler
+from .command_input_gateway import CommandInputGateway
 from .utils import remove_commas, url_validator
 from .request import Request
 from .ai_inference import Ollama, LiteLLM
@@ -9,7 +9,7 @@ from .config import read, write
 __all__ = [
     "CoreOps",
     "CrudOps",
-    "user_command_handler",
+    "CommandInputGateway",
     "remove_commas",
     "url_validator",
     "Request",

@@ -1,9 +1,10 @@
 from onstart import OnStart  
 from rich.console import Console
-from src.user_command import user_command_handler
+from src.command_input_gateway import CommandInputGateway
 
 console = Console()
 on_startup = OnStart()
+input_gatway = CommandInputGateway()
 
 def main():
     # display intro
@@ -15,7 +16,7 @@ def main():
     # display connection status
     on_startup.display_connection_status()
     # call user command handler to allow user to perform various operations
-    user_command_handler()
+    input_gatway.user_input_loop()
     
 
 if __name__ == "__main__":

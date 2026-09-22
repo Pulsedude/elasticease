@@ -16,6 +16,7 @@ core_commands = [
             "optional": "<json_response> <ai_summary>"
         },
         "purpose": "See all available shards in your running node (🤖)",
+        "example": "shards | shards json | shards json true", 
         "info": "Use this command to see available shards on active nodes. You can use commands in three different ways\n(i) shards - Use when you need response in proper table format (more readable)\n(ii) shards json - Use when you actually need a response in JSON format\n(iii) shards json true - Use when you need JSON response with AI-powered summary\n"
     },
     {
@@ -25,6 +26,7 @@ core_commands = [
             "optional": "<json_response> <ai_summary>"
         },
         "purpose": "See all available indices in your running nodes (🤖)",
+        "example": "indices | indices json | indices json true",
         "info": "Use this command to see existing indices on the active nodes. You can use commands in three different ways\n(i) indices - Use when you need response in proper table format (more readable)\n(ii) indices json - Use when you actually need a response in JSON format\n(iii) indices json true - Use when you need JSON response with AI-powered summary\n"
     },
     {
@@ -34,6 +36,7 @@ core_commands = [
             "optional": "<json_response> <ai_summary>"
         },
         "purpose": "Ping to your Elastic cluster (🤖)",
+        "example": "ping | ping true",
         "info": "Use this command to ping to your elastic cluster. You can use commands in two different ways\n(i) ping - Use when you need response in JSON format\n(ii) ping true - Use when you need AI-powered summary on ping data\n"
     },
     {
@@ -43,7 +46,7 @@ core_commands = [
             "optional": "<json_response> <ai_summary>"
         },
         "purpose": "See details of target index (🤖)",
-        "example": "indexinfo \"students\"",
+        "example": "indexinfo \"students\" | indexinfo \"students\" true",
         "info": "Use this command to see details of any such exising index. You can use commands in two different ways\n(i) indexinfo <index_name> - Use when you need response in JSON format\n(ii) indexinfo <index_name> true - Use when you need AI-powered summary to understand specific index\n"
     },
     {
@@ -53,6 +56,7 @@ core_commands = [
             "optional": "<json_response>"
         },
         "purpose": "See master nodes",
+        "example": "master | master json",
         "info": "Use this see active master node. You can use commands in two different ways\n(i) master - Use when you need response Table format (readable format)\n(ii) master json - Use when you want response in JSON format\n"
     },
     {
@@ -62,6 +66,7 @@ core_commands = [
             "optional": "<json_response> <ai_summary>"
         },
         "purpose": "See total nodes running on the current cluster (🤖)",
+        "example": "nodes | nodes json | nodes json true",
         "info": "Use this command to active nodes on cluster. You can use commands in three different ways\n(i) nodes - Use when you need response in proper table format (more readable)\n(ii) nodes json - Use when you actually need a response in JSON format\n(iii) nodes json true - Use when you need JSON response with AI-powered summary\n"
     },
     {
@@ -71,6 +76,7 @@ core_commands = [
             "optional": "<json_response> <ai_summary>"
         },
         "purpose": "See the total storage capacities of active nodes (🤖)",
+        "example": "capacity | capacity json | capacity json true",
         "info": "Use this command to see storage capacities of active nodes (allocated storage). You can use commands in three different ways\n(i) capacity - Use when you need response in proper table format (more readable)\n(ii) capacity json - Use when you actually need a response in JSON format\n(iii) capacity json true - Use when you need JSON response with AI-powered summary\n"
     },
     {
@@ -88,19 +94,29 @@ core_commands = [
             "required": "<URL>",
             "optional": None
         },
-        "purpose": "Change a connection URL for Elasticsearch to allow Elasticease to make connection",
+        "purpose": "Change a connection URL for Elasticsearch to allow elasticease to make connection",
         "example": "conn \"https://localhost:9200\"",
         "info": "Use this command to change or add new elastic connection base URL. You can use commands in one way only\nconn \"https://localhost:9200\" - Update or add new elastic connection base URL\n"
     },
     {
-        "name": "newcred <password>",
+        "name": "newpass <password>",
         "arguments": {
             "required": None,
             "optional": None
         },
-        "purpose": "Add or Update new Elasticsearch credentials (username, password)  for Elasticease to make connection",
-        "example": "newcred \"1234@newpasswordXYZ\"",
-        "info": "Use this command to add or update elasticsearch credentials to make connection with elasticsearch. You can use commands in one way only\nnewcred \"1234@newpasswordXYZ\" - Add or update elasticsearch credentials\n"
+        "purpose": "Add or Update new Elasticsearch password for elasticease to make connection",
+        "example": "newpass \"1234@newpasswordXYZ\"",
+        "info": "Use this command to add or update elasticsearch credentials to make connection with elasticsearch. You can use commands in one way only\nnewpass \"1234@newpasswordXYZ\" - Add or update elasticsearch pasword to make connection with elasticsearch\n"
+    },
+    {
+        "name": "help",
+        "arguments": {
+            "required": None,
+            "optional": "<command_name>"
+        },
+        "purpose": "See all available commands or see usage of any specific available command",
+        "example": "help | help \"nodes\"",
+        "info": "Use this command to see all available commands (options) or to see or usage of specific available command. You can use commands in two ways\n(i)help - Use this when you want to see all available commands (options)\n(ii)help <command_name> - Use this when you want to know the usage of any specific command\n"
     }
 ]
 
@@ -132,7 +148,7 @@ crud_commands = [
     },
     {
         "name": "updoc <index_name> <document_id> <document>",
-        "purpose": "Update a document of existing index",
+        "purpose": "Update a document of existing index (with OCC control)",
         "example": "updoc \"students\" \"12345XYSA_abc\" \"name: John, interest: Backend\""
     }
 ]

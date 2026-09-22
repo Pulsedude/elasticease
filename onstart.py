@@ -32,7 +32,7 @@ class OnStart:
         console.print(
             Panel.fit(
                 Text.from_markup(
-                    "[bold cyan]Elasticease[/bold cyan] is an interactive CLI for working with "
+                    "[bold cyan]elasticease[/bold cyan] is an interactive CLI for working with "
                     "Elasticsearch from your terminal.\n\n"
                     "It is built to make common cluster tasks easier: check cluster health, "
                     "ping your configured Elasticsearch node, inspect shards, indices, nodes, "
@@ -62,8 +62,10 @@ class OnStart:
         core_commands_table.add_column("example")
         
         for command in core_commands:
+            argument = command.get("arguments").get("required")
+            
             core_commands_table.add_row(
-                f"[bold]{command.get("name")}[/bold]",
+                f"[bold]{command.get("name") if argument is None else command.get("name") + " " + argument}[/bold]",
                 command.get("purpose"),
                 command.get("example") if command.get("example") else "-"
             )

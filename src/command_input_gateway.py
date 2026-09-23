@@ -195,7 +195,7 @@ class CommandInputGateway:
     #                       CRUD Command Handlers
     # ----------------------------------------------------------------------
 
-    def index_new_command_handler(self, command: str):
+    def new_index_command_handler(self, command: str):
         """Special command handler to create a new index"""
         command_to_create_new_index = command.split()
 
@@ -370,7 +370,7 @@ class CommandInputGateway:
 
                     # to create a new index
                     elif user_input.lower().startswith("index:new"):
-                        self.index_new_command_handler(user_input)
+                        self.new_index_command_handler(user_input)
 
                     # to delete a existing index
                     elif user_input.lower().startswith("index:del"):

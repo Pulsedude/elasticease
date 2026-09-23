@@ -17,7 +17,7 @@ crudops = CrudOps()
 
 
 class CommandInputGateway:
-    
+
     def core_commands_double_argu_handler(self, command: str, action):
         """Special command handler for commands which supports double arguments (json, AI Summarization)
         """
@@ -33,7 +33,7 @@ class CommandInputGateway:
 
             # check second argument
             passed_args.append(first_argu)
-            passed_args.append(sec_argu)            
+            passed_args.append(sec_argu)
 
             # arguments validation
             if passed_args[0] == passed_args[1]:
@@ -58,12 +58,12 @@ class CommandInputGateway:
 
             if first_argu == "json":
                 action(json_result=True)
-                return  
-            
+                return
+
             elif first_argu == "true":
                 action(ai_summarization=True)
                 return
-            
+
             elif first_argu == "false":
                 action(ai_summarization=False)
                 return
@@ -195,16 +195,33 @@ class CommandInputGateway:
     #                       CRUD Command Handlers
     # ----------------------------------------------------------------------
 
-    def index_new_command_handler(self, command: str):
+    def new_index_command_handler(self, command: str):
         """Special command handler to create a new index"""
         command_to_create_new_index = command.split()
-        if len(command_to_create_new_index) < 2:
-            console.print(
-                "[!] Please use the correct syntax of command \"index:new <index_name>\" to create a new index.\n", style="red")
+
+        if len(command_to_create_new_index) > 2:
+            arg1, arg2 = remove_commas(command_to_create_new_index[1]), remove_commas(command_to_create_new_index[2])
+            
+            if arg2 not in {"true", "false"}:
+                console.print(f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"true\" for it else leave empty or use \"false\"\n", style="red")
+                return
+            
+            if arg2.lower() == "true":
+                crudops.new_index(arg1, True)
+                return
+            else:
+                crudops.new_index(arg1)
+                return
+
+        elif len(command_to_create_new_index) > 1:
+            arg1 = remove_commas(command_to_create_new_index[1])
+            crudops.new_index(arg1)
             return
 
-        crudops.new_index(remove_commas(
-            command_to_create_new_index[1]))
+        else:
+            console.print(
+                f"[!] You: {command}\nPlease use the correct syntax of command \"index:new <index_name>\" to create a new index without custom mappings. If you want a custom mappings then use syntax \"index:new \"stundents\" \"name: text, age: integer, address: text, email: keyword\"\".\n", style="red")
+            return
 
     def index_del_command_handler(self, command: str):
         """Special command handler to delete an existing index"""
@@ -286,26 +303,6 @@ class CommandInputGateway:
         console.print("See ya!", style="bold")
         sys.exit(0)
 
-    # Command handler aliases
-    health_handler = health_command_handler
-    shards_handler = shards_command_handler
-    indices_handler = indices_command_handler
-    ping_handler = ping_command_handler
-    indexinfo_handler = indexinfo_command_handler
-    master_handler = master_command_handler
-    nodes_handler = nodes_command_handler
-    capacity_handler = capacity_command_handler
-    conn_handler = conn_command_handler
-    newcred_handler = newcred_command_handler
-    clear_handler = clear_command_handler
-    index_new_handler = index_new_command_handler
-    index_del_handler = index_del_command_handler
-    addoc_handler = addoc_command_handler
-    inspect_doc_handler = inspect_doc_command_handler
-    inspect_index_handler = inspect_index_command_handler
-    updoc_handler = updoc_command_handler
-    exit_handler = exit_command_handler
-
     def user_input_loop(self):
         """User input (command) loop & handler to allow user to perform various operations through available commands
         """
@@ -373,7 +370,7 @@ class CommandInputGateway:
 
                     # to create a new index
                     elif user_input.lower().startswith("index:new"):
-                        self.index_new_command_handler(user_input)
+                        self.new_index_command_handler(user_input)
 
                     # to delete a existing index
                     elif user_input.lower().startswith("index:del"):

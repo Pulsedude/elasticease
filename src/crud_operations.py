@@ -1,4 +1,5 @@
 from rich.console import Console
+from rich.prompt import Prompt
 from rich.json import JSON
 from .config import read
 import json
@@ -8,28 +9,71 @@ import asyncio
 from .request import Request
 
 # utilites
-from .utils import create_document
+from .utils import create_document, create_mappings
 
 console = Console()
 req = Request()
+
 
 class CrudOps:
     def __init__(self):
         self.configuration = read().get("elasticease")
 
-    def new_index(self, index_name: str):
+    def new_index(self, index_name: str, custom_mappings: bool = False, mappings: dict = {}):
         """Create new index
         """
         try:
-            response = asyncio.run(req.put(index_name))
+            if not custom_mappings:
+                response = asyncio.run(req.put(index_name))
 
-            if isinstance(response, tuple):
-                console.print(response[1], style="bold red")
+                if isinstance(response, tuple):
+                    console.print(response[1], style="bold red")
+                    print()
+                    return
+
+                console.print(JSON(json.dumps(response.get("response"))))
                 print()
                 return
 
-            console.print(JSON(json.dumps(response.get("response"))))
-            print()
+            else:
+                mappings = {}
+
+                # input from user to create custom mapping
+                console.print(
+                    "\nPlease enter the fields that you want for your index:\nProvide just like that - e.g. \"name: text, age: integer, addres: text, about: text\n", style="bold")
+                while True:
+                    user = input("> ")
+
+                    if not user:
+                        continue
+
+                    else:
+                        # confirmation input
+                        while True:
+                            confirmation = Prompt.ask(
+                                "\nPlease recheck your provided mappings:\nconfirm [green][Y][green]/[red][N][red]")
+
+                            if not confirmation:
+                                continue
+                            
+                            if confirmation.lower() in {"no", "n"}:
+                                continue
+                            
+                            else:
+                                break
+
+                        mappings = create_mappings(user)
+                        break
+
+                response = asyncio.run(req.put(index_name, mappings))
+
+                if isinstance(response, tuple):
+                    console.print(response[1], style="bold red")
+                    print()
+                    return
+
+                console.print(JSON(json.dumps(response.get("response"))))
+                print()
 
         except Exception as e:
             console.print(e, style="bold red")
@@ -95,7 +139,8 @@ class CrudOps:
         """
         try:
 
-            response = asyncio.run(req.get(f"{index_name}/_search?size={size}"))
+            response = asyncio.run(
+                req.get(f"{index_name}/_search?size={size}"))
 
             if isinstance(response, tuple):
                 console.print(response[1], style="bold red")

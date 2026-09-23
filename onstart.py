@@ -84,8 +84,10 @@ class OnStart:
         crud_commands_table.add_column("example")
         
         for command in crud_commands:
+            argument = command.get("arguments").get("required")
+            
             crud_commands_table.add_row(
-                f"[bold]{command.get("name")}[/bold]",
+                f"[bold]{command.get("name") if argument is None else command.get("name") + " " + argument}[/bold]",
                 command.get("purpose"),
                 command.get("example") if command.get("example") else "-",
                 

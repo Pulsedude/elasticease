@@ -37,7 +37,7 @@ class CommandInputGateway:
 
             # arguments validation
             if passed_args[0] == passed_args[1]:
-                console.print(f"[!] You: {command}\nYou are passing same parameters for both arguments. Please use to correct it and use to pass right parameters for specific argument, use [\"json\"] to get response in JSON format and use [\"true\" or \"false\"] to get AI-powered summary.\n", style="red")
+                console.print(f"[!] You: {command}\nYou are passing same parameters for both arguments. Please use to correct it and use to pass right parameters for specific argument, use [\"json\"] to get response in JSON format and use [\"true\" or \"false\"] to get AI-powered summary. Or use command \"help {command[0]}\" to exact usage of command with available optional arguments.\n", style="red")
                 return
 
             sorted_args = sorted(passed_args)
@@ -48,7 +48,7 @@ class CommandInputGateway:
                 return
 
             else:
-                console.print(f"[!] You: {command}\nThis command supports two special arguments 1st argument for json results if you want response in JSON format and 2nd argument for AI-powered data summarization you want a proper data summary. So please use pass correct argument you are allowed to use any such argument from [\"json\"] for json result flag and [\"true\" or \"false\"] for AI-powered summary flag. Pass in any such order but pass with as correct parameter.\n", style="red")
+                console.print(f"[!] You: {command}\nThis command supports two special arguments 1st argument for json results if you want response in JSON format and 2nd argument for AI-powered data summarization you want a proper data summary. So please use pass correct argument you are allowed to use any such argument from [\"json\"] for json result flag and [\"true\" or \"false\"] for AI-powered summary flag. Pass in any such order but pass with as correct parameter. Or use command \"help {command[0]}\" to exact usage of command with available optional arguments.\n", style="red")
                 return
 
         # command passed with single argument
@@ -68,7 +68,7 @@ class CommandInputGateway:
                 action(ai_summarization=False)
                 return
             else:
-                console.print(f"[!] You: {command}\nPlease use correct paramters to pass in arguments if you are passing single argument with command which supports two special arguments one for json results to get response in proper JSON format and 2nd for AI-powered summary to get AI-powered summary on specific data. So you can you use [\"json\"] to get response in JSON format or [\"true\" or \"false\"] for AI-powered summarization.\n", style="red")
+                console.print(f"[!] You: {command}\nPlease use correct paramters to pass in arguments if you are passing single argument with command which supports two special arguments one for json results to get response in proper JSON format and 2nd for AI-powered summary to get AI-powered summary on specific data. So you can you use [\"json\"] to get response in JSON format or [\"true\" or \"false\"] for AI-powered summarization. Or use command \"help {command[0]}\" to exact usage of command with available optional arguments.\n", style="red")
                 return
 
         else:
@@ -85,7 +85,7 @@ class CommandInputGateway:
         if len(health_check_cmd) > 1:
             if health_check_cmd[1].lower() not in {"true", "false"}:
                 console.print(
-                    "Please use valid argument \"true\" or \"false\" in order to get AI-powered summary\n", style="red")
+                    "Please use valid argument \"true\" or \"false\" in order to get AI-powered summary. Or use command \"help heatlh\" to see exact usage of command with available optional arguments.\n", style="red")
                 return
 
             elif health_check_cmd[1].lower() == "true":
@@ -124,7 +124,7 @@ class CommandInputGateway:
                 return
             else:
                 console.print(
-                    "Please use valid argument \"true\" or \"false\" in order to get AI-powered summary\n", style="red")
+                    "Please use valid argument \"true\" or \"false\" in order to get AI-powered summary. Or use command \"help indexinfo\" to see exact usage of command with available optional arguments.\n", style="red")
                 return
 
         elif len(cmd_to_see_index_details) > 1:
@@ -135,7 +135,7 @@ class CommandInputGateway:
 
         else:
             console.print(
-                f"[!] You: {command}\nPlease provide a at least one required argument [index_name]\n", style="red")
+                f"[!] You: {command}\nPlease provide a at least one required argument [index_name]. Or use command \"help indexinfo\" to see exact usage of command with available optional arguments.\n", style="red")
             return
 
     def master_command_handler(self, command: str):
@@ -150,7 +150,7 @@ class CommandInputGateway:
                 coreops.master_node(json_result=True)
             else:
                 console.print(
-                    "Please use valid argument \"json\" in order to get JSON format response.\n", style="red")
+                    "Please use valid argument \"json\" in order to get JSON format response. Or use command \"help master\" to see exact usage of command with available optional arguments.\n", style="red")
                 return
         else:
             coreops.active_nodes()
@@ -168,9 +168,10 @@ class CommandInputGateway:
     def conn_command_handler(self, command: str):
         """Special command handler to update or add new elasticsearch base url"""
         command_to_updated_elastic_base_url = command.split()
+        
         if len(command_to_updated_elastic_base_url) < 2:
             console.print(
-                "[!] Please use the correct syntax of command \"conn <base_url>\" to add or updated with new Elasticsearch base request URL.\n", style="red")
+                "[!] Please use the correct syntax of command \"conn <base_url>\" to add or updated with new Elasticsearch base request URL. Or use command \"help conn\" to see exact usage of command.\n", style="red")
             return
 
         coreops.new_password(remove_commas(
@@ -179,9 +180,10 @@ class CommandInputGateway:
     def newcred_command_handler(self, command: str):
         """Special command handler to update or add new elasticsearch password for connection"""
         command_to_update_elastic_password = command.split()
+        
         if len(command_to_update_elastic_password) < 2:
             console.print(
-                "[!] Please use the correct syntax of command \"newcred <new_password>\" to add or updated elastic password for connection.\n", style="red")
+                "[!] Please use the correct syntax of command \"newcred <new_password>\" to add or updated elastic password for connection. Or use command \"help newcred\" to see exact usage of command.\n", style="red")
             return
 
         coreops.new_password(remove_commas(
@@ -203,7 +205,7 @@ class CommandInputGateway:
             arg1, arg2 = remove_commas(command_to_create_new_index[1]), remove_commas(command_to_create_new_index[2])
             
             if arg2 not in {"true", "false"}:
-                console.print(f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"true\" for it else leave empty or use \"false\"\n", style="red")
+                console.print(f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"true\" for it else leave empty or use \"false\". Or use command \"help index:new\" to see exact usage of command with optional arguments.\n", style="red")
                 return
             
             if arg2.lower() == "true":
@@ -220,15 +222,16 @@ class CommandInputGateway:
 
         else:
             console.print(
-                f"[!] You: {command}\nPlease use the correct syntax of command \"index:new <index_name>\" to create a new index without custom mappings. If you want a custom mappings then use syntax \"index:new \"stundents\" \"name: text, age: integer, address: text, email: keyword\"\".\n", style="red")
+                f"[!] You: {command}\nPlease use the correct syntax of command \"index:new <index_name>\" to create a new index without custom mappings. If you want a custom mappings then use syntax \"index:new \"stundents\" \"name: text, age: integer, address: text, email: keyword\"\". Or use command \"help index:new\" to see exact usage of command with optional arguments.\n", style="red")
             return
 
     def index_del_command_handler(self, command: str):
         """Special command handler to delete an existing index"""
         command_to_delete_index = command.split()
+        
         if len(command_to_delete_index) < 2:
             console.print(
-                "[!] Please use the correct syntax of command \"index:del <index_name>\" to delete a existing index.\n", style="red")
+                "[!] Please use the correct syntax of command \"index:del <index_name>\" to delete a existing index. Or use command \"help index:del\" to see exact usage of command.\n", style="red")
             return
 
         crudops.del_index(remove_commas(
@@ -237,9 +240,10 @@ class CommandInputGateway:
     def addoc_command_handler(self, command: str):
         """Special command handler to insert document into existing index"""
         command_to_insert_document = command.split()
+        
         if len(command_to_insert_document) < 3:
             console.print(
-                "[!] Please use the correct syntax of command \"addoc <index_name> <document_in_str>\" to add document into existing index.\n", style="red")
+                "[!] Please use the correct syntax of command \"addoc <index_name> <document_in_str>\" to add document into existing index. Or use command \"help addoc\" to see exact usage of command.\n", style="red")
             return
 
         # extract document fields and values and build a proper document string
@@ -254,13 +258,28 @@ class CommandInputGateway:
 
         crudops.add_doc(remove_commas(
             command_to_insert_document[1]), doc_str)
+        
+        
+    def addocs_command_handler(self, command: str):
+        """Special command handler to insert multiple documents from single data (.json) file. Only supports .json file"""
+        command_to_insert_documents = command.split()
+        
+        if len(command_to_insert_documents) < 3:
+            console.print(
+                "[!] Please use the correct syntax of command \"addocs <index_name> <data_file_path>\" to add document into existing index. Or use command \"help addocs\" to exact usage of command.\n", style="red")
+            return      
+
+        index_name, data_file_path = remove_commas(command_to_insert_documents[1]), remove_commas(command_to_insert_documents[2])
+        crudops.add_docs(index_name, data_file_path)
+        
 
     def inspect_doc_command_handler(self, command: str):
         """Special command handler to see specific document"""
         command_to_see_specific_doc = command.split()
+        
         if len(command_to_see_specific_doc) < 3:
             console.print(
-                "[!] Please use the correct syntax of command \"inspect:doc <index_name> <document_id>\" to see a specific document.\n", style="red")
+                "[!] Please use the correct syntax of command \"inspect:doc <index_name> <document_id>\" to see a specific document. Or use command \"help inspect:doc\" to exact usage of command.\n", style="red")
             return
 
         crudops.see_specific_doc(remove_commas(
@@ -269,9 +288,10 @@ class CommandInputGateway:
     def inspect_index_command_handler(self, command: str):
         """Special command handler to see specific index stored data (inspect stored data)"""
         command_to_see_specific_index = command.split()
+        
         if len(command_to_see_specific_index) < 2:
             console.print(
-                "[!] Please use the correct syntax of command \"inspect:index <index_name> <no. of documents to see>\" to inspect specific index to see stored data (documents).\n", style="red")
+                "[!] Please use the correct syntax of command \"inspect:index <index_name> <no. of documents to see>\" to inspect specific index to see stored data (documents). Or use command \"help inspect:index\" to exact usage of command.\n", style="red")
             return
 
         crudops.inspect_index_data(remove_commas(
@@ -282,7 +302,7 @@ class CommandInputGateway:
         command_to_update_doc = command.split()
         if len(command_to_update_doc) < 4:
             console.print(
-                "[!] Please use the correct syntax of command \"updoc <index_name> <document_id> <document_in_str>\" to update document into existing index.\n", style="red")
+                "[!] Please use the correct syntax of command \"updoc <index_name> <document_id> <document_in_str>\" to update document into existing index. Or use command \"help updoc\" to see exact usage of command.\n", style="red")
             return
 
         # extract document fields and values and build a proper document string
@@ -376,9 +396,14 @@ class CommandInputGateway:
                     elif user_input.lower().startswith("index:del"):
                         self.index_del_command_handler(user_input)
 
+                    # to insert multiple documents from single data file (.json) to existing index
+                    elif user_input.lower().startswith("addocs"):
+                        
+                        self.addocs_command_handler(user_input)
                     # to insert document into existing index
                     elif user_input.lower().startswith("addoc"):
                         self.addoc_command_handler(user_input)
+                        
 
                     # to see specific document
                     elif user_input.lower().startswith("inspect:doc"):

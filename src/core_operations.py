@@ -23,75 +23,80 @@ req = Request()
 class CoreOps:
     def __init__(self):
         configuration = read()
-        
-        self.ai_mode = configuration if isinstance(configuration, tuple) else configuration.get("elasticease").get("ai_mode")
-        self.selected_ai_inference = configuration if isinstance(configuration, tuple) else configuration.get("elasticease").get("selected_ai_inference")
-        
-        self.elastic_base_url = configuration if isinstance(configuration, tuple) else configuration.get("elasticease").get("base_url")
-        
+
+        self.ai_mode = None if isinstance(configuration, tuple) else (configuration.get(
+            "elasticease", {}).get("ai_mode") if configuration.get("elasticease") else None)
+        self.selected_ai_inference = None if isinstance(configuration, tuple) else (configuration.get(
+            "elasticease", {}).get("selected_ai_inference") if configuration.get("elasticease") else None)
+
+        self.elastic_base_url = None if isinstance(configuration, tuple) else (
+            configuration.get("elasticease", {}).get(
+                "elasticsearch", {}).get("base_url")
+            if configuration.get("elasticease") else None
+        )
+
         # AI Inferences instances
         self.ollama = Ollama()
         self.litellm = LiteLLM()
-    
+
     def ask_ai(self, prompt: str):
         """Ask AI for data summarization (according to selected AI Inference data summarization request will forward to the selected AI Inference (provider))
         """
         try:
             if isinstance(self.ai_mode, tuple):
                 return (False, self.ai_mode[1])
-        
+
             if not isinstance(self.ai_mode, bool):
                 return (False, "Please use \"true\" or \"false\" for ai_mode. Change it in configuration")
 
-            
             if isinstance(self.selected_ai_inference, tuple):
                 return (False, self.selected_ai_inference[1])
-            
-            
+
             if self.selected_ai_inference.lower() == "ollama":
                 # ask via ollama
-                
+
                 response_via_olama = self.ollama.ask(prompt)
-                
+
                 if isinstance(response_via_olama, tuple):
                     return (False, response_via_olama[1])
-                
+
                 return response_via_olama
-            
+
             elif self.selected_ai_inference.lower() == "litellm":
                 # ask via litellm
-                
+
                 response_via_litellm = self.litellm.ask(prompt)
-                
+
                 if isinstance(response_via_litellm, tuple):
                     return (False, response_via_litellm[1])
 
                 return response_via_litellm
-            
+
             else:
-                return (False, "Unkown AI Inference selected. Please check the configuration")         
-                            
+                return (False, "Unkown AI Inference selected. Please check the configuration")
+
         except Exception as e:
             return (False, str(e))
-    
+
     def display_data_with_summary(self, data, prompt: str):
         """Summarize data according to fetched data and print in the console  
         """
         try:
             console.print("Summarizing for you...\n", style="bold green")
-            
+
             ai_summary = self.ask_ai(prompt)
-            
+
             if isinstance(ai_summary, tuple):
                 console.print(data)
-                console.print(f"Something went wrong while summarizing data! {ai_summary[1]}\n", style="red")
+                console.print(
+                    f"Something went wrong while summarizing data! {ai_summary[1]}\n", style="red")
                 return
-            
+
             console.print(data)
             print()
             console.print(Markdown(ai_summary))
             print()
-            
+
         except Exception as e:
             return (False, str(e))
 
@@ -123,10 +128,11 @@ class CoreOps:
             if not (ai_summarization or (isinstance(self.ai_mode, bool) and self.ai_mode)):
                 console.print(cluster_health_info_table)
                 return
-            
+
             else:
-                self.display_data_with_summary(cluster_health_info_table, f"{response}\nHere is the latest elasticsearch active cluster health data. So please summarize the this given cluster health data into such easier way which is very easy to understand the health of current active cluster. Explain the part of data which is some kind of hard to understand if has.")
-            
+                self.display_data_with_summary(
+                    cluster_health_info_table, f"{response}\nHere is the latest elasticsearch active cluster health data. So please summarize the this given cluster health data into such easier way which is very easy to understand the health of current active cluster. Explain the part of data which is some kind of hard to understand if has.")
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
@@ -181,7 +187,7 @@ class CoreOps:
                 console.print(data_to_display)
                 print()
                 return
-            
+
             else:
                 self.display_data_with_summary(
                     data_to_display,
@@ -257,7 +263,7 @@ class CoreOps:
                 console.print(data_to_display)
                 print()
                 return
-            
+
             else:
                 self.display_data_with_summary(
                     data_to_display,
@@ -287,7 +293,7 @@ class CoreOps:
                 console.print(response.get("latency"))
                 print()
                 return
-            
+
             else:
                 self.display_data_with_summary(
                     ping_info,
@@ -315,7 +321,7 @@ class CoreOps:
                 console.print(data_to_display)
                 print()
                 return
-            
+
             else:
                 self.display_data_with_summary(
                     data_to_display,
@@ -345,7 +351,7 @@ class CoreOps:
                     "latency": f"{response.get("latency")} ms"
                 }
                 data_to_display = JSON(json.dumps(master_node_data))
-                
+
             else:
                 master_node_table.add_column("id")
                 master_node_table.add_column("host")
@@ -364,7 +370,7 @@ class CoreOps:
             console.print(data_to_display)
             print()
             return
-            
+
         except Exception as e:
             console.print(e, style="bold red")
             print()
@@ -423,7 +429,7 @@ class CoreOps:
                 console.print(data_to_display)
                 print()
                 return
-            
+
             else:
                 self.display_data_with_summary(
                     data_to_display,
@@ -502,7 +508,7 @@ class CoreOps:
                 console.print(data_to_display)
                 print()
                 return
-            
+
             else:
                 self.display_data_with_summary(
                     data_to_display,
@@ -517,7 +523,7 @@ class CoreOps:
         """
         try:
             configuration = read()
-            
+
             if isinstance(configuration, tuple):
                 return (False, configuration[1])
 
@@ -528,7 +534,35 @@ class CoreOps:
             self.configuration = configuration["elasticease"]
             console.print(
                 f"[bold]New Password:[/bold] [bright_cyan]{password}[/bright_cyan]\n[bright_green]Updated! Now please restart the elasticease console to continue.[/bright_green]\n")
-            
+
+        except Exception as e:
+            console.print(e, style="bold red")
+            print()
+
+    def new_base_url(self, base_url: str):
+        """Change or update a new Elasticsearch base URL for connection
+        """
+        try:
+            from .utils import url_validator
+            is_valid = url_validator(base_url)
+            if isinstance(is_valid, tuple):
+                console.print(is_valid[1], style="bold red")
+                return
+
+            configuration = read()
+
+            if isinstance(configuration, tuple):
+                return (False, configuration[1])
+
+            configuration.setdefault("elasticease", {})
+            configuration["elasticease"].setdefault("elasticsearch", {})
+            configuration["elasticease"]["elasticsearch"]["base_url"] = base_url
+            write(configuration)
+
+            self.elastic_base_url = base_url
+            console.print(
+                f"[bold]New Base URL:[/bold] [bright_cyan]{base_url}[/bright_cyan]\n[bright_green]Updated! Now please restart the elasticease console to continue.[/bright_green]\n")
+
         except Exception as e:
             console.print(e, style="bold red")
             print()

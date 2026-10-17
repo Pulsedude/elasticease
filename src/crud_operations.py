@@ -4,16 +4,11 @@ from rich.console import Console
 from rich.prompt import Prompt
 from rich.json import JSON
 from .config import read
-from pathlib import Path
 import json
 import asyncio
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# custom request logic
-
-# utilites
 
 console = Console()
 req = Request()
@@ -25,7 +20,7 @@ class CrudOps:
         self.configuration = None if isinstance(
             configuration, tuple) else configuration.get("elasticease")
 
-    def new_index(self, index_name: str, custom_mappings: bool = False, mappings: dict = {}):
+    def new_index(self, index_name: str, custom_mappings: bool = False):
         """Create new index
         """
         try:
@@ -46,7 +41,8 @@ class CrudOps:
 
                 # input from user to create custom mapping
                 console.print(
-                    "\nPlease enter the fields that you want for your index:\nProvide just like that - e.g. \"name: text, age: integer, address: text, about: text\"\n", style="bold")
+                    "\nPlease enter the fields with valid type annotations:\nProvide just like that - e.g. \"name=text age=integer address=text about=text\"\n", style="bold")
+                
                 while True:
                     user = input("> ")
 
@@ -217,14 +213,39 @@ class CrudOps:
         """Update multiple documents at once into existing index
         """
         try:
-            response = asyncio.run(req.bulk_update(index_name, data_file))
+            # ask user for confirmation input
+            while True:
+                confirmation = Prompt.ask(
+                    "Are you sure? [bold][Y][/bold] / [bold][N][/bold]")
 
-            if isinstance(response, tuple):
-                console.print(response[1], style="red", markup=False)
-                return
+                if not confirmation:
+                    console.print(
+                        "Please specify your answer!\n", style="yellow")
+                    continue
 
-            console.print(JSON(json.dumps(response.get("response"))))
-            print()
+                # update multiple documents 
+                if confirmation.lower() in {"yes", "y"}:
+                    response = asyncio.run(req.bulk_update(
+                        index_name, data_file))
+
+                    if isinstance(response, tuple):
+                        console.print(response[1], style="red", markup=False)
+                        return
+
+                    console.print(JSON(json.dumps(response.get("response"))))
+                    print()
+                    break
+
+                # updation operation abort
+                elif confirmation.lower() in {"no", "n"}:
+                    console.print(
+                        "Bulk delete operation cancelled!\n", style="red")
+                    break
+
+                else:
+                    console.print(
+                        "[yellow]Please specify your answer in [yellow] [bold][Y][/bold] / [bold][N][/bold]\n")
+                    continue
 
         except Exception as e:
             console.print(e, style="bold red", markup=False)
@@ -261,7 +282,7 @@ class CrudOps:
                     console.print(
                         "Please specify your answer!\n", style="yellow")
                     continue
-                
+
                 # delete documents operation
                 if confirmation.lower() in {"yes", "y"}:
                     response = asyncio.run(req.bulk_delete(
@@ -278,7 +299,7 @@ class CrudOps:
                 # deletion operation abort
                 elif confirmation.lower() in {"no", "n"}:
                     console.print(
-                        "Bulk delete operation cancelled!", style="red")
+                        "Bulk delete operation cancelled!\n", style="red")
                     break
 
                 else:
@@ -289,3 +310,5 @@ class CrudOps:
         except Exception as e:
             console.print(e, style="bold red")
             print()
+
+

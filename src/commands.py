@@ -128,7 +128,7 @@ crud_commands = [
             "optional": "<with_mappings>"
         },
         "purpose": "Create a new index with or without custom mappings",
-        "example": "index:new \"students\" | index:new \"students\" \"true\"",
+        "example": "index:new \"students\" | index:new \"students\" \"mappings\"",
         "info": "Use this command create new index with or without custom mappings. You can use commands in two ways\n(i)index:new <index_name> - Use it when you don't want a custom mappings, elasticsearch will create automatically for you according to data fields\n(ii)index:new <index_name> \"true\"- Use it when you want provide a custom mappings according to data fields\n"
     },
     {
@@ -164,12 +164,12 @@ crud_commands = [
     {
         "name": "addoc",
         "arguments": {
-            "required": "<index_name> <document>",
+            "required": "<index_name> <key_values>",
             "optional": None
         },
-        "purpose": "Add a document into a index",
-        "example": "addoc \"students\" \"name: john, age: 22, role: engineer\"",
-        "info": "Use this command insert new document into existing index. You can use commands in one way only\n(i)addoc <index_name> \"name: john, age: 22, role: engineer\"  - Use it to insert new single document into existing index \n"
+        "purpose": "Insert a document into a index",
+        "example": "addoc \"students\" \"name=john age=22 hobby=\'playing video games\'\"",
+        "info": "Use this command insert new document into existing index. You can use commands in one way only\n(i)addoc <index_name> \"name=john age=22 hobby=\'playing video games\'\"  - Use it to insert new single document into existing index \n"
     },
     {
         "name": "addocs",
@@ -188,8 +188,8 @@ crud_commands = [
             "optional": None
         },
         "purpose": "Update single document of existing index (with OCC control)",
-        "example": "updoc \"students\" \"12345XYSA_abc\" \"name: John, interest: Backend\"",
-        "info": "Use this command to update single exsting document. You can use commands in one way only\n(i)updoc <index_name> <document_id> \"name: kelvin, age: 22, role: engineer\" - Use it to update single existing document\n"
+        "example": "updoc \"students\" \"12345XYSA_abc\" \"name=John hobby=\'do coding\'\"",
+        "info": "Use this command to update single exsting document. You can use commands in one way only\n(i)updoc <index_name> <document_id> \"name=kelvin age=22 role=\'making DIY crafts\'\" - Use it to update single existing document\n"
     },
     {
         "name": "updocs",

@@ -3,7 +3,7 @@ from rich.prompt import Prompt
 from rich.markdown import Markdown
 import sys
 
-# utils
+# util functions
 from .utils import remove_commas
 
 # core operaitons  ------
@@ -297,14 +297,13 @@ class CommandInputGateway:
 
         if len(command_to_create_new_index) > 2:
             arg1, arg2 = remove_commas(command_to_create_new_index[1]), remove_commas(
-                command_to_create_new_index[2])
-
-            if arg2 not in {"true", "false"}:
-                console.print(f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"true\" for it else leave empty or use \"false\". Or use command \"help index:new\" to see exact usage of command with optional arguments.\n", style="red")
+                command_to_create_new_index[2]).lower()
+            if arg2 != "mappings":
+                console.print(f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"mappings\" for it else leave empty. Or use command \"help index:new\" to see exact usage of command with optional arguments.\n", style="red")
                 return
 
-            if arg2.lower() == "true":
-                crudops.new_index(arg1, True)
+            if arg2.lower() == "mappings":
+                crudops.new_index(arg1, custom_mappings=True)
                 return
             else:
                 crudops.new_index(arg1)
@@ -338,7 +337,7 @@ class CommandInputGateway:
 
         if len(command_to_insert_doc) < 3:
             console.print(
-                "[!] Please use the correct syntax of command \"addoc <index_name> <document_in_str>\" to add document into existing index. Or use command \"help addoc\" to see exact usage of command.\n", style="red")
+                "[!] Please use the correct syntax of command \"addoc <index_name> <key_values>\" to add document into existing index. Or use command \"help addoc\" to see exact usage of command.\n", style="red")
             return
 
         # extract document fields and values and build a proper document string

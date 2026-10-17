@@ -271,7 +271,7 @@ class Request:
             return (False, str(e))
 
     async def bulk_update(self, index_name: str, data_file: str):
-        """Custom request method to update multiple existing documents using bulk API 
+        """Custom request method to update multiple existing documents using bulk API with proper OCC control
         """
         try:
             if self.elastic_base_url is None or self.elastic_username is None or self.elastic_pass is None or self.verify_certs is None:
@@ -287,9 +287,22 @@ class Request:
                 lines = []
                 
                 for doc in docs:
+                    # fetch existing document to extract their current _seq_no and _primary_term
+                    doc_id = doc.get("_id") or doc.get("id")
+                    
+                    if doc_id is None:
+                        return (False, f"document has no id provided for updation! Please recheck your data file {data_file}\n")
+                    
+                    existing_doc = await self.get(f"/{index_name}/_doc/{doc_id}")
+                    seq_no = existing_doc.get("_seq_no")
+                    primary_term = existing_doc.get("_primary_term")
+                    
+                    # create x-ndjson for document 
                     action_meta = {}
                     action_meta["update"] = {
-                        "_id": doc.get("id") or doc.get("_id")
+                        "_id": doc_id,
+                        "if_seq_no": seq_no,
+                        "if_primary_term": primary_term
                     }
 
                     lines.append(json.dumps(action_meta))

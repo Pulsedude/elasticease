@@ -5,25 +5,6 @@ def remove_commas(text: str) -> str:
     return text
 
 
-def filter_str(text: str, target_chars: set) -> str:
-    """Filter given string by removing target characters 
-    """
-    text_list = list(text)
-    i, n = 0, len(text_list)
-
-    while i < n:
-        char = text_list[i]
-
-        if char in target_chars:
-            text_list.remove(char)
-            n -= 1
-            continue
-
-        i += 1
-
-    return "".join(text_list)
-
-
 def url_validator(url: str) -> str:
     """Validate a url whether is is starts with required protocols or not
     """

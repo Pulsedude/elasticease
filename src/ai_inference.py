@@ -61,12 +61,13 @@ class LiteLLM:
         """Ask any such model by the help of Litellm which is basically works as a router to sending query to any such model of any such provider
         """
         try:
-            if not self.base_url or not self.model or not self.timeout:
-                return (False, "Please check the ollama configuration!")
+            if not self.model or not self.api_key:
+                return (False, "Please check the litellm configuration!")
             
-            response = completion(model=self.model, messages=[{"role": "user", "content": prompt}])
+            response = completion(model=self.model, messages=[{"role": "user", "content": prompt}], api_key=self.api_key)
     
             return response.choices[0].message.content
         
         except Exception as e:
             return (False, str(e))
+

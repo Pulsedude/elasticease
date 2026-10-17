@@ -1,10 +1,27 @@
-import re
-
 def remove_commas(text: str) -> str:
     for i in text:
         if i == "\'" or i == "\"":
             text = text.replace(i, "")
     return text
+
+
+def filter_str(text: str, target_chars: set) -> str:
+    """Filter given string by removing target characters 
+    """
+    text_list = list(text)
+    i, n = 0, len(text_list)
+
+    while i < n:
+        char = text_list[i]
+
+        if char in target_chars:
+            text_list.remove(char)
+            n -= 1
+            continue
+
+        i += 1
+
+    return "".join(text_list)
 
 
 def url_validator(url: str) -> str:
@@ -16,18 +33,55 @@ def url_validator(url: str) -> str:
 
 
 def create_document(text: str) -> dict:
-    """Create a JSON (dict) document from given string (text) to insert into elasticsearch index
+    """Create a JSON (dict) proper valid document from given string (text) 
     """
-    document = {}
-    last_key = ""
-    for i, letter in enumerate(text.split()):
-        cleaned_letter = re.sub(r'[^a-zA-Z0-9]', '', letter)
-
-        if (i + 1) % 2 == 0:
-            document[last_key] = cleaned_letter if not cleaned_letter.isdigit() else int(
-                cleaned_letter)
-
+    keys, values = [], []
+    text_list = text.split()
+    
+    i, n = 0, len(text_list)
+    
+    while i < n:
+        pair = [remove_commas(i) for i in text_list[i].split("=")]
+        
+        if len(pair) == 1:
+            values[-1] += f" {pair[0]}"
         else:
-            document[cleaned_letter] = ""
-            last_key = cleaned_letter if not cleaned_letter.isdigit() else int(cleaned_letter)
+            keys.append(pair[0])
+            values.append(pair[1])
+            
+        i += 1
+    
+    document = {}
+    i, j, n, m = 0, 0, len(keys), len(values)
+    
+    while i < n and j < m:
+        key, value = keys[i], values[j]
+        document[key] = value
+        i += 1
+        j += 1
+    
     return document
+    
+
+def create_mappings(text: str) -> dict:
+    """Create a JSON based (dict) valid mapping document from given string (text) 
+    """
+    mappings = {}
+    properties = {}
+     
+    text_list = text.split()    
+    i, n = 0, len(text_list)
+    
+    while i < n:
+        pair = [remove_commas(i) for i in text_list[i].split("=")]
+        
+        properties[pair[0]] = {
+            "type": pair[1]
+        }
+        i += 1
+    
+    mappings["mappings"] = {"properties": properties}
+    return mappings 
+
+
+    

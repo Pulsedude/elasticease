@@ -377,7 +377,7 @@ Contributions, bug reports, and feature requests are welcome!
 
 ## 📄 License
 
-This project is open-source and distributed under the **MIT License**.
+This project is open-source and distributed under the [**MIT License**](https://github.com/Pulsedude/elasticease/blob/main/LICENSE).
 
 <div align="center">
   <b>Built with ❤️ to make Elasticsearch effortless.</b>

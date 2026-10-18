@@ -113,20 +113,20 @@ class CommandInputGateway:
 
     def ping_command_handler(self, command: str = "ping"):
         """Special command handler to ping cluster to check health"""
-        cmd_list = command.split()
-        if len(cmd_list) > 1 and cmd_list[1].lower() == "true":
+        ping_command = command.split()
+        if len(ping_command) > 1 and ping_command[1].lower() == "true":
             coreops.ping(ai_summarization=True)
         else:
             coreops.ping()
 
     def indexinfo_command_handler(self, command: str):
         """Special command handler to see specific existing index details"""
-        cmd_to_see_index_details = command.split()
+        indexinfo_command = command.split()
 
-        if len(cmd_to_see_index_details) > 2:
-            index_name = remove_commas(cmd_to_see_index_details[1])
+        if len(indexinfo_command) > 2:
+            index_name = remove_commas(indexinfo_command[1])
             first_argu = remove_commas(
-                cmd_to_see_index_details[2])
+                indexinfo_command[2])
 
             if first_argu.lower() == "true":
                 coreops.index_details(index_name, ai_summarization=True)
@@ -136,9 +136,9 @@ class CommandInputGateway:
                     "Please use valid argument \"true\" or \"false\" in order to get AI-powered summary. Or use command \"help indexinfo\" to see exact usage of command with available optional arguments.\n", style="red")
                 return
 
-        elif len(cmd_to_see_index_details) > 1:
+        elif len(indexinfo_command) > 1:
             index_name = remove_commas(
-                cmd_to_see_index_details[1])
+                indexinfo_command[1])
             coreops.index_details(index_name)
             return
 
@@ -149,11 +149,11 @@ class CommandInputGateway:
 
     def master_command_handler(self, command: str):
         """Special command handler to see master nodes"""
-        cmd_to_see_master_node = command.split()
+        master_inspect_command = command.split()
 
-        if len(cmd_to_see_master_node) > 1:
+        if len(master_inspect_command) > 1:
             argu = remove_commas(
-                cmd_to_see_master_node[1]).lower()
+                master_inspect_command[1]).lower()
 
             if argu == "json":
                 coreops.master_node(json_result=True)
@@ -176,47 +176,67 @@ class CommandInputGateway:
 
     def conn_command_handler(self, command: str):
         """Special command handler to update or add new elasticsearch base url"""
-        command_to_updated_elastic_base_url = command.split()
+        conn_command = command.split()
 
-        if len(command_to_updated_elastic_base_url) < 2:
+        if len(conn_command) < 2:
             console.print(
                 "[!] Please use the correct syntax of command \"conn <base_url>\" to add or updated with new Elasticsearch base request URL. Or use command \"help conn\" to see exact usage of command.\n", style="red")
             return
 
         coreops.new_base_url(remove_commas(
-            command_to_updated_elastic_base_url[1]))
+            conn_command[1]))
+
+    def ainf_command_handler(self, command: str):
+        """Special command handler to handle command ainf to switch to another available Ai-Inference (provider) or see active one"""
+        ainf_command = command.split()
+
+        if len(ainf_command) > 1:
+            arg2 = ainf_command[1].lower()
+
+            if arg2 == "switch":
+                coreops.switch_ai_inference()
+                return
+            else:
+                console.print(
+                    "[!] Please use the correct syntax of command \"ainf\" to see selected & active AI-Inference (provider) or switch to another one. Or use command \"help ainf\" to see exact usage of command.\n", style="red")
+                return
+        else:
+            coreops.active_ai_inference()
 
     def newcred_command_handler(self, command: str):
         """Special command handler to update or add new elasticsearch password for connection"""
-        command_to_update_elastic_password = command.split()
+        newcred_command = command.split()
 
-        if len(command_to_update_elastic_password) < 2:
+        if len(newcred_command) < 2:
             console.print(
                 "[!] Please use the correct syntax of command \"newcred <new_password>\" to add or updated elastic password for connection. Or use command \"help newcred\" to see exact usage of command.\n", style="red")
             return
 
         coreops.new_password(remove_commas(
-            command_to_update_elastic_password[1]))
-    
-    
+            newcred_command[1]))
+
     def help_command_handler(self, command: str):
         """Command handler to handle help command
         """
         help_command = command.split()
-        
+
         if len(help_command) > 2:
-            console.print("[!] help command does not support more than two arguments\n", style="red")
-            return  
-        
+            console.print(
+                "[!] help command does not support more than two arguments\n", style="red")
+            return
+
         elif len(help_command) == 2:
             command_name = remove_commas(help_command[1]).lower()
-            
+
             for options in [core_commands, crud_commands]:
                 for option in options:
                     if option.get("name") == command_name or option.get("name").split()[0] == command_name or (command_name in ("newcred", "newpass") and option.get("name").startswith("newpass")) or (command_name in ("clear", "cls") and option.get("name") == "clear"):
+                        
                         name = option.get("name")
-                        required_arguments = option.get("arguments").get("required") if option.get("arguments") else None
-                        optional_arguments = option.get("arguments").get("optional") if option.get("arguments") else None
+                        required_arguments = option.get("arguments").get(
+                            "required") if option.get("arguments") else None
+                        optional_arguments = option.get("arguments").get(
+                            "optional") if option.get("arguments") else None
                         purpose = option.get("purpose")
                         example = option.get("example")
                         info = option.get("info")
@@ -225,8 +245,10 @@ class CommandInputGateway:
                         ex_str = f"`{example}`" if example else "None"
                         purpose_str = purpose if purpose else "None"
 
-                        info_lines = [line.strip() for line in info.strip().splitlines() if line.strip()] if info else []
-                        info_str = "  \n  ".join(info_lines) if info_lines else "None"
+                        info_lines = [line.strip() for line in info.strip(
+                        ).splitlines() if line.strip()] if info else []
+                        info_str = "  \n  ".join(
+                            info_lines) if info_lines else "None"
 
                         command_md = f"""
 # Command: `{name}`
@@ -240,26 +262,29 @@ class CommandInputGateway:
 """
                         console.print(Markdown(command_md))
                         return
-            
-            console.print(f"[!] command with name \"{command_name}\" not found!\n", style="red")
-            return  
+
+            console.print(
+                f"[!] command with name \"{command_name}\" not found!\n", style="red")
+            return
 
         else:
             for idx, options in enumerate([core_commands, crud_commands]):
                 console.print("=" * 37, style="cyan")
-                
+
                 if idx > 0:
                     console.print("Available options for CRUD operations")
                 else:
                     console.print("Available options for Core operations")
-                    
+
                 console.print("=" * 37, style="cyan")
                 print()
-                
+
                 for option in options:
                     name = option.get("name")
-                    required_arguments = option.get("arguments").get("required")
-                    optional_arguments = option.get("arguments").get("optional")
+                    required_arguments = option.get(
+                        "arguments").get("required")
+                    optional_arguments = option.get(
+                        "arguments").get("optional")
                     purpose = option.get("purpose")
                     example = option.get("example")
                     info = option.get("info")
@@ -268,8 +293,10 @@ class CommandInputGateway:
                     ex_str = f"`{example}`" if example else "None"
                     purpose_str = purpose if purpose else "None"
 
-                    info_lines = [line.strip() for line in info.strip().splitlines() if line.strip()] if info else []
-                    info_str = "  \n  ".join(info_lines) if info_lines else "None"
+                    info_lines = [line.strip() for line in info.strip(
+                    ).splitlines() if line.strip()] if info else []
+                    info_str = "  \n  ".join(
+                        info_lines) if info_lines else "None"
 
                     command_md = f"""
 ### Command: `{name}`
@@ -293,13 +320,14 @@ class CommandInputGateway:
 
     def new_index_command_handler(self, command: str):
         """Special command handler to create a new index"""
-        command_to_create_new_index = command.split()
+        index_new_command = command.split()
 
-        if len(command_to_create_new_index) > 2:
-            arg1, arg2 = remove_commas(command_to_create_new_index[1]), remove_commas(
-                command_to_create_new_index[2]).lower()
+        if len(index_new_command) > 2:
+            arg1, arg2 = remove_commas(index_new_command[1]), remove_commas(
+                index_new_command[2]).lower()
             if arg2 != "mappings":
-                console.print(f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"mappings\" for it else leave empty. Or use command \"help index:new\" to see exact usage of command with optional arguments.\n", style="red")
+                console.print(
+                    f"[!] You: {command}\nIf you want to provide your own custom mappings then please use \"mappings\" for it else leave empty. Or use command \"help index:new\" to see exact usage of command with optional arguments.\n", style="red")
                 return
 
             if arg2.lower() == "mappings":
@@ -309,8 +337,8 @@ class CommandInputGateway:
                 crudops.new_index(arg1)
                 return
 
-        elif len(command_to_create_new_index) > 1:
-            arg1 = remove_commas(command_to_create_new_index[1])
+        elif len(index_new_command) > 1:
+            arg1 = remove_commas(index_new_command[1])
             crudops.new_index(arg1)
             return
 
@@ -321,29 +349,29 @@ class CommandInputGateway:
 
     def index_del_command_handler(self, command: str):
         """Special command handler to delete an existing index"""
-        command_to_delete_index = command.split()
+        index_del_command = command.split()
 
-        if len(command_to_delete_index) < 2:
+        if len(index_del_command) < 2:
             console.print(
                 "[!] Please use the correct syntax of command \"index:del <index_name>\" to delete a existing index. Or use command \"help index:del\" to see exact usage of command.\n", style="red")
             return
 
         crudops.del_index(remove_commas(
-            command_to_delete_index[1]))
+            index_del_command[1]))
 
     def addoc_command_handler(self, command: str):
         """Special command handler to insert document into existing index"""
-        command_to_insert_doc = command.split()
+        addoc_command = command.split()
 
-        if len(command_to_insert_doc) < 3:
+        if len(addoc_command) < 3:
             console.print(
                 "[!] Please use the correct syntax of command \"addoc <index_name> <key_values>\" to add document into existing index. Or use command \"help addoc\" to see exact usage of command.\n", style="red")
             return
 
         # extract document fields and values and build a proper document string
         doc_str = ""
-        for i in command_to_insert_doc[2:]:
-            if i == command_to_insert_doc[-1]:
+        for i in addoc_command[2:]:
+            if i == addoc_command[-1]:
                 doc_str += i
                 break
             else:
@@ -351,105 +379,103 @@ class CommandInputGateway:
                 doc_str += " "
 
         crudops.add_doc(remove_commas(
-            command_to_insert_doc[1]), doc_str)
+            addoc_command[1]), doc_str)
 
     def addocs_command_handler(self, command: str):
         """Special command handler to insert multiple documents from single data (.json) file. Only supports .json file"""
-        command_to_insert_docs = command.split()
+        addocs_command = command.split()
 
-        if len(command_to_insert_docs) < 3:
+        if len(addocs_command) < 3:
             console.print(
                 "[!] Please use the correct syntax of command \"addocs <index_name> <data_file_path>\" to add document into existing index. Or use command \"help addocs\" to exact usage of command.\n", style="red")
             return
 
-        index_name = remove_commas(command_to_insert_docs[1])
-        data_file_path = remove_commas(" ".join(command_to_insert_docs[2:]))
+        index_name = remove_commas(addocs_command[1])
+        data_file_path = remove_commas(" ".join(addocs_command[2:]))
         crudops.add_docs(index_name, data_file_path)
 
     def inspect_doc_command_handler(self, command: str):
         """Special command handler to see specific document"""
-        command_to_see_specific_doc = command.split()
+        inspect_do_command = command.split()
 
-        if len(command_to_see_specific_doc) < 3:
+        if len(inspect_do_command) < 3:
             console.print(
                 "[!] Please use the correct syntax of command \"inspect:doc <index_name> <document_id>\" to see a specific document. Or use command \"help inspect:doc\" to exact usage of command.\n", style="red")
             return
 
         crudops.see_specific_doc(remove_commas(
-            command_to_see_specific_doc[1]), remove_commas(command_to_see_specific_doc[2]))
+            inspect_do_command[1]), remove_commas(inspect_do_command[2]))
 
     def inspect_index_command_handler(self, command: str):
         """Special command handler to see specific index stored data (inspect stored data)"""
-        command_to_see_specific_index = command.split()
+        inspect_index_command = command.split()
 
-        if len(command_to_see_specific_index) < 2:
+        if len(inspect_index_command) < 2:
             console.print(
                 "[!] Please use the correct syntax of command \"inspect:index <index_name> <no. of documents to see>\" to inspect specific index to see stored data (documents). Or use command \"help inspect:index\" to exact usage of command.\n", style="red")
             return
 
         crudops.inspect_index_data(remove_commas(
-            command_to_see_specific_index[1]))
+            inspect_index_command[1]))
 
     def updocs_command_handler(self, command: str):
         """Special command handler to update multiple existing documents at once. Need supported data file (.json) in which having data and according to data updation operation will performed"""
-        command_to_update_docs = command.split()
+        updocs_command = command.split()
 
-        if len(command_to_update_docs) < 3:
+        if len(updocs_command) < 3:
             console.print(
                 "[!] Please use the correct syntax of command \"updocs <index_name> <data_file_path>\" to update multiple documents at once into existing index. Or use command \"help updocs\" to see exact usage of command.\n", style="red")
             return
 
-        index_name = remove_commas(command_to_update_docs[1])
-        data_file_path = remove_commas("".join(command_to_update_docs[2:]))
+        index_name = remove_commas(updocs_command[1])
+        data_file_path = remove_commas("".join(updocs_command[2:]))
         crudops.update_docs(index_name, data_file_path)
 
     def updoc_command_handler(self, command: str):
         """Special command handler to update existing document in any specific index"""
-        command_to_update_doc = command.split()
-        if len(command_to_update_doc) < 4:
+        updoc_command = command.split()
+        if len(updoc_command) < 4:
             console.print(
                 "[!] Please use the correct syntax of command \"updoc <index_name> <document_id> <document_in_str>\" to update document into existing index. Or use command \"help updoc\" to see exact usage of command.\n", style="red")
             return
 
         # extract document fields and values and build a proper document string
         doc_str = ""
-        for i in command_to_update_doc[3:]:
-            if i == command_to_update_doc[-1]:
+        for i in updoc_command[3:]:
+            if i == updoc_command[-1]:
                 doc_str += i
                 break
             else:
                 doc_str += i
                 doc_str += " "
 
-        crudops.update_doc(remove_commas(command_to_update_doc[1]), remove_commas(
-            command_to_update_doc[2]),  doc_str)
+        crudops.update_doc(remove_commas(updoc_command[1]), remove_commas(
+            updoc_command[2]),  doc_str)
 
     def deldoc_command_handler(self, command: str):
         """Special command handler to delete any such particular document
         """
-        command_to_delete_doc = command.split()
-        if len(command_to_delete_doc) < 3:
+        deldoc_command = command.split()
+        if len(deldoc_command) < 3:
             console.print(
                 "[!] Please use the correct syntax of command \"deldoc <index_name> <document_id>\" to delete single document. Or use command \"help deldoc\" to see exact usage of command.\n", style="red")
             return
 
         crudops.delete_doc(remove_commas(
-            command_to_delete_doc[1]), remove_commas(command_to_delete_doc[2]))
-    
-    
+            deldoc_command[1]), remove_commas(deldoc_command[2]))
+
     def deldocs_command_handler(self, command: str):
         """Special command handler to delete any such particular document
         """
-        command_to_delete_doc = command.split()
-        if len(command_to_delete_doc) < 3:
+        dedocs_command = command.split()
+        if len(dedocs_command) < 3:
             console.print(
                 "[!] Please use the correct syntax of command \"deldocs <index_name> <targets>\" to delete single document. Or use command \"help deldocs\" to see exact usage of command.\n", style="red")
             return
 
         crudops.delete_docs(remove_commas(
-            command_to_delete_doc[1]), remove_commas(command_to_delete_doc[2]))
-    
-    
+            dedocs_command[1]), remove_commas(dedocs_command[2]))
+
     def exit_command_handler(self):
         """Special command handler to exit elasticease"""
         console.print("See ya!", style="bold")
@@ -508,14 +534,18 @@ class CommandInputGateway:
                     elif user_input.lower().startswith("conn"):
                         self.conn_command_handler(user_input)
 
+                    # see active & selected AI-Inference (provider) and also switch to another available one
+                    elif user_input.lower().startswith("ainf"):
+                        self.ainf_command_handler(user_input)
+
                     # update or add new elasticsearch password for connection
                     elif user_input.lower().startswith("newcred") or user_input.lower().startswith("newpass"):
                         self.newcred_command_handler(user_input)
 
-                    # help command 
+                    # help command
                     elif user_input.lower().startswith("help"):
                         self.help_command_handler(user_input)
-                        
+
                     # clear console
                     elif user_input.lower() in ("clear", "cls"):
                         self.clear_command_handler()
@@ -547,11 +577,11 @@ class CommandInputGateway:
                     # to insert document into existing index
                     elif user_input.lower().startswith("addoc"):
                         self.addoc_command_handler(user_input)
-                        
+
                     # to update multiple existing documents at once
                     elif user_input.lower().startswith("updocs"):
                         self.updocs_command_handler(user_input)
-                        
+
                     # to update single existing document
                     elif user_input.lower().startswith("updoc"):
                         self.updoc_command_handler(user_input)
@@ -559,11 +589,10 @@ class CommandInputGateway:
                     # to delete multiple existing documents at once
                     elif user_input.lower().startswith("deldocs"):
                         self.deldocs_command_handler(user_input)
-                        
+
                     # to delete single existing document
                     elif user_input.lower().startswith("deldoc"):
                         self.deldoc_command_handler(user_input)
-
 
                     elif user_input.lower() in ("exit", "quit", "q", "ex"):
                         self.exit_command_handler()

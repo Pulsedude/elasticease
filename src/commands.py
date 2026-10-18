@@ -99,6 +99,16 @@ core_commands = [
         "info": "Use this command to change or add new elastic connection base URL. You can use commands in one way only\nconn \"https://localhost:9200\" - Update or add new elastic connection base URL\n"
     },
     {
+        "name": "ainf",
+        "arguments": {
+            "required": None,
+            "optional": "switch"
+        },
+        "purpose": "See current selected & active AI Inference (provider) or switch to another AI-Inference from available options Ollama or LiteLLM",
+        "example": "ainf | ainf switch",
+        "info": "Use this command to see your current selected AI Inference (provider). You can use commands in two ways\n(i) ainf - Use it to see selected & active AI Inference (provider)\n(ii) ainf switch - Use it to switch to another AI Inference (provider)"
+    },
+    {
         "name": "newpass <password>",
         "arguments": {
             "required": None,

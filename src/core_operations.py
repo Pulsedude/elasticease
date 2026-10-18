@@ -6,6 +6,7 @@ from rich.json import JSON
 import json
 import urllib3
 import asyncio
+import random
 
 # custom request logic
 from .request import Request
@@ -544,6 +545,7 @@ class CoreOps:
         """
         try:
             from .utils import url_validator
+            
             is_valid = url_validator(base_url)
             if isinstance(is_valid, tuple):
                 console.print(is_valid[1], style="bold red")
@@ -566,3 +568,55 @@ class CoreOps:
         except Exception as e:
             console.print(e, style="bold red")
             print()
+
+    def active_ai_inference(self):
+        """Display active AI-Inference (provider) to the console 
+        """
+        configuration = read()
+        
+        if isinstance(configuration, tuple):
+            return (False, configuration[1])
+        
+        if configuration.get("elasticease").get("selected_ai_inference") is None:
+            console.print("[!] Please select any one AI Inference to use some available AI capabilities. Use command \"ainf switch\" to switch to any one available AI Inference (provider) or do it manually by editing configuration file.\n", style="red")
+            return
+
+        console.print(
+            f"[bold]Active AI-Inference (provider):[/bold] [cyan]{configuration.get("elasticease").get("selected_ai_inference")}[/cyan]\n")
+
+    def switch_ai_inference(self):
+        """Switch to another AI-inference (provider) apart from selected one. If no any such active then switch to anyone
+        """
+        configuration = read()
+        
+        if isinstance(configuration, tuple):
+            return (False, configuration[1])
+        
+        if configuration.get("elasticease").get("selected_ai_inference") is None:
+
+            configuration["elasticease"]["selected_ai_inference"] = "ollama"
+
+            write(configuration)
+            console.print(
+                f"[bold]Switched to AI-Inference (provider):[/bold] [cyan]ollama[/cyan]\n")
+
+        elif configuration.get("elasticease").get("selected_ai_inference").lower() == "ollama":
+  
+            configuration["elasticease"]["selected_ai_inference"] = "litellm"
+            write(configuration)
+            console.print(
+                f"[bold]Switched to AI-Inference (provider):[/bold] [cyan]litellm[/cyan]\n")
+
+        elif configuration.get("elasticease").get("selected_ai_inference").lower() == "litellm":
+        
+            configuration["elasticease"]["selected_ai_inference"] = "ollama"
+            write(configuration)
+            console.print(
+                f"[bold]Switched to AI-Inference (provider):[/bold] [cyan]ollama[/cyan]\n")
+            
+        else:
+            # if user selected any such random AI-Inference (provider) then detect it and set to by default to "ollama"
+            configuration["elasticease"]["selected_ai_inference"] = "ollama"
+            write(configuration)
+            console.print(
+                f"[bold]Switched to AI-Inference (provider):[/bold] [cyan]ollama[/cyan]\n")
